@@ -26,14 +26,20 @@ const Sign_up = () => {
     if (!formData.phone) {
       newErrors.phone = 'Phone number is required';
     } else if (!/^\d{10}$/.test(formData.phone)) {
-      newErrors.phone = 'Phone number must be 10 digits';
+      newErrors.phone = 'Please enter exactly 10 digits (no spaces or special characters)';
     }
     
-    // Email validation
+    // Email validation with more detailed error messages
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = 'Email address is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+      if (formData.email.indexOf('@') === -1) {
+        newErrors.email = 'Email must contain an @ symbol';
+      } else if (formData.email.indexOf('.') === -1) {
+        newErrors.email = 'Email must contain a domain (e.g., .com, .org)';
+      } else {
+        newErrors.email = 'Please enter a valid email address (e.g., user@example.com)';
+      }
     }
     
     // Password validation
@@ -45,6 +51,58 @@ const Sign_up = () => {
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const validateField = (fieldName, value) => {
+    const newErrors = { ...errors };
+    
+    if (fieldName === 'name') {
+      if (!value.trim()) {
+        newErrors.name = 'Name is required';
+      } else if (value.length < 2) {
+        newErrors.name = 'Name must be at least 2 characters';
+      } else {
+        delete newErrors.name;
+      }
+    }
+    
+    if (fieldName === 'phone') {
+      if (!value) {
+        newErrors.phone = 'Phone number is required';
+      } else if (!/^\d{10}$/.test(value)) {
+        newErrors.phone = 'Please enter exactly 10 digits (no spaces or special characters)';
+      } else {
+        delete newErrors.phone;
+      }
+    }
+    
+    if (fieldName === 'email') {
+      if (!value) {
+        newErrors.email = 'Email address is required';
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        if (value.indexOf('@') === -1) {
+          newErrors.email = 'Email must contain an @ symbol';
+        } else if (value.indexOf('.') === -1) {
+          newErrors.email = 'Email must contain a domain (e.g., .com, .org)';
+        } else {
+          newErrors.email = 'Please enter a valid email address (e.g., user@example.com)';
+        }
+      } else {
+        delete newErrors.email;
+      }
+    }
+    
+    if (fieldName === 'password') {
+      if (!value) {
+        newErrors.password = 'Password is required';
+      } else if (value.length < 6) {
+        newErrors.password = 'Password must be at least 6 characters';
+      } else {
+        delete newErrors.password;
+      }
+    }
+    
+    setErrors(newErrors);
   };
 
   const handleChange = (e) => {
@@ -73,6 +131,11 @@ const Sign_up = () => {
         [name]: null
       });
     }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    validateField(name, value);
   };
 
   const handleSubmit = (e) => {
@@ -114,40 +177,47 @@ const Sign_up = () => {
                 id="name"
                 required
                 className={`form-control ${errors.name ? 'is-invalid' : ''}`}
-                placeholder="Enter your name"
+                placeholder="Enter your full name"
                 value={formData.name}
                 onChange={handleChange}
+                onBlur={handleBlur}
               />
               {errors.name && <div className="error-message">{errors.name}</div>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="phone">Phone</label>
+              <label htmlFor="phone">Phone Number</label>
               <input
                 type="tel"
                 name="phone"
                 id="phone"
                 required
+                pattern="\d{10}"
+                title="10-digit phone number"
                 className={`form-control ${errors.phone ? 'is-invalid' : ''}`}
-                placeholder="Enter your phone number"
+                placeholder="Enter your 10-digit phone number"
                 value={formData.phone}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 maxLength="10"
               />
               {errors.phone && <div className="error-message">{errors.phone}</div>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="email">Email</label>
+              <label htmlFor="email">Email Address</label>
               <input
                 type="email"
                 name="email"
                 id="email"
                 required
+                pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
+                title="Valid email address"
                 className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                placeholder="Enter your email"
+                placeholder="Enter your email (e.g., user@example.com)"
                 value={formData.email}
                 onChange={handleChange}
+                onBlur={handleBlur}
               />
               {errors.email && <div className="error-message">{errors.email}</div>}
             </div>
@@ -160,9 +230,10 @@ const Sign_up = () => {
                 id="password"
                 required
                 className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                placeholder="Enter your password"
+                placeholder="Enter your password (min 6 characters)"
                 value={formData.password}
                 onChange={handleChange}
+                onBlur={handleBlur}
               />
               {errors.password && <div className="error-message">{errors.password}</div>}
             </div>

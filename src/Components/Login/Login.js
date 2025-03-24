@@ -14,11 +14,17 @@ const Login = () => {
   const validateForm = () => {
     const newErrors = {};
     
-    // Email validation
+    // Enhanced email validation with specific error messages
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = 'Email address is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      if (formData.email.indexOf('@') === -1) {
+        newErrors.email = 'Email must contain an @ symbol';
+      } else if (formData.email.indexOf('.') === -1) {
+        newErrors.email = 'Email must contain a domain (e.g., .com, .org)';
+      } else {
+        newErrors.email = 'Please enter a valid email address (e.g., user@example.com)';
+      }
     }
     
     // Password validation
@@ -30,6 +36,38 @@ const Login = () => {
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const validateField = (fieldName, value) => {
+    const newErrors = { ...errors };
+    
+    if (fieldName === 'email') {
+      if (!value) {
+        newErrors.email = 'Email address is required';
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        if (value.indexOf('@') === -1) {
+          newErrors.email = 'Email must contain an @ symbol';
+        } else if (value.indexOf('.') === -1) {
+          newErrors.email = 'Email must contain a domain (e.g., .com, .org)';
+        } else {
+          newErrors.email = 'Please enter a valid email address (e.g., user@example.com)';
+        }
+      } else {
+        delete newErrors.email;
+      }
+    }
+    
+    if (fieldName === 'password') {
+      if (!value) {
+        newErrors.password = 'Password is required';
+      } else if (value.length < 6) {
+        newErrors.password = 'Password must be at least 6 characters';
+      } else {
+        delete newErrors.password;
+      }
+    }
+    
+    setErrors(newErrors);
   };
 
   const handleChange = (e) => {
@@ -48,13 +86,17 @@ const Login = () => {
     }
   };
 
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    validateField(name, value);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validateForm()) {
       setIsSubmitting(true);
       // Form is valid - proceed with login
       console.log('Login form submitted:', formData);
-      // Add your login logic here (API call, etc.)
       // Simulate API call
       setTimeout(() => {
         setIsSubmitting(false);
@@ -84,15 +126,19 @@ const Login = () => {
         <div className="login-form">
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="email">Email</label>
+              <label htmlFor="email">Email Address</label>
               <input
                 type="email"
                 name="email"
                 id="email"
+                required
+                pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
+                title="Valid email address"
                 className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                placeholder="Enter your email"
+                placeholder="Enter your email (e.g., user@example.com)"
                 value={formData.email}
                 onChange={handleChange}
+                onBlur={handleBlur}
               />
               {errors.email && <div className="error-message">{errors.email}</div>}
             </div>
@@ -103,10 +149,12 @@ const Login = () => {
                 type="password"
                 name="password"
                 id="password"
+                required
                 className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                placeholder="Enter your password"
+                placeholder="Enter your password (min 6 characters)"
                 value={formData.password}
                 onChange={handleChange}
+                onBlur={handleBlur}
               />
               {errors.password && <div className="error-message">{errors.password}</div>}
             </div>
