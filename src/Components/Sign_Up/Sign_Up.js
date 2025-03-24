@@ -25,21 +25,17 @@ const Sign_up = () => {
     // Phone validation - must be exactly 10 digits
     if (!formData.phone) {
       newErrors.phone = 'Phone number is required';
+    } else if (formData.phone.length < 10) {
+      newErrors.phone = 'Phone number must be exactly 10 digits';
     } else if (!/^\d{10}$/.test(formData.phone)) {
-      newErrors.phone = 'Please enter exactly 10 digits (no spaces or special characters)';
+      newErrors.phone = 'Phone number must contain only digits';
     }
     
-    // Email validation with more detailed error messages
+    // Email validation
     if (!formData.email) {
-      newErrors.email = 'Email address is required';
+      newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      if (formData.email.indexOf('@') === -1) {
-        newErrors.email = 'Email must contain an @ symbol';
-      } else if (formData.email.indexOf('.') === -1) {
-        newErrors.email = 'Email must contain a domain (e.g., .com, .org)';
-      } else {
-        newErrors.email = 'Please enter a valid email address (e.g., user@example.com)';
-      }
+      newErrors.email = 'Please enter a valid email address';
     }
     
     // Password validation
@@ -51,58 +47,6 @@ const Sign_up = () => {
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  const validateField = (fieldName, value) => {
-    const newErrors = { ...errors };
-    
-    if (fieldName === 'name') {
-      if (!value.trim()) {
-        newErrors.name = 'Name is required';
-      } else if (value.length < 2) {
-        newErrors.name = 'Name must be at least 2 characters';
-      } else {
-        delete newErrors.name;
-      }
-    }
-    
-    if (fieldName === 'phone') {
-      if (!value) {
-        newErrors.phone = 'Phone number is required';
-      } else if (!/^\d{10}$/.test(value)) {
-        newErrors.phone = 'Please enter exactly 10 digits (no spaces or special characters)';
-      } else {
-        delete newErrors.phone;
-      }
-    }
-    
-    if (fieldName === 'email') {
-      if (!value) {
-        newErrors.email = 'Email address is required';
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-        if (value.indexOf('@') === -1) {
-          newErrors.email = 'Email must contain an @ symbol';
-        } else if (value.indexOf('.') === -1) {
-          newErrors.email = 'Email must contain a domain (e.g., .com, .org)';
-        } else {
-          newErrors.email = 'Please enter a valid email address (e.g., user@example.com)';
-        }
-      } else {
-        delete newErrors.email;
-      }
-    }
-    
-    if (fieldName === 'password') {
-      if (!value) {
-        newErrors.password = 'Password is required';
-      } else if (value.length < 6) {
-        newErrors.password = 'Password must be at least 6 characters';
-      } else {
-        delete newErrors.password;
-      }
-    }
-    
-    setErrors(newErrors);
   };
 
   const handleChange = (e) => {
@@ -135,7 +79,19 @@ const Sign_up = () => {
 
   const handleBlur = (e) => {
     const { name, value } = e.target;
-    validateField(name, value);
+    if (name === 'phone') {
+      const newErrors = { ...errors };
+      if (!value) {
+        newErrors.phone = 'Phone number is required';
+      } else if (value.length < 10) {
+        newErrors.phone = 'Phone number must be exactly 10 digits';
+      } else if (!/^\d{10}$/.test(value)) {
+        newErrors.phone = 'Phone number must contain only digits';
+      } else {
+        delete newErrors.phone;
+      }
+      setErrors(newErrors);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -143,7 +99,6 @@ const Sign_up = () => {
     if (validateForm()) {
       // Form is valid - proceed with submission
       console.log('Form submitted:', formData);
-      // Add your signup logic here (API call, etc.)
       alert('Form submitted successfully!');
     }
   };
@@ -177,10 +132,9 @@ const Sign_up = () => {
                 id="name"
                 required
                 className={`form-control ${errors.name ? 'is-invalid' : ''}`}
-                placeholder="Enter your full name"
+                placeholder="Enter your name"
                 value={formData.name}
                 onChange={handleChange}
-                onBlur={handleBlur}
               />
               {errors.name && <div className="error-message">{errors.name}</div>}
             </div>
@@ -193,7 +147,7 @@ const Sign_up = () => {
                 id="phone"
                 required
                 pattern="\d{10}"
-                title="10-digit phone number"
+                title="Please enter exactly 10 digits"
                 className={`form-control ${errors.phone ? 'is-invalid' : ''}`}
                 placeholder="Enter your 10-digit phone number"
                 value={formData.phone}
@@ -205,19 +159,16 @@ const Sign_up = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="email">Email Address</label>
+              <label htmlFor="email">Email</label>
               <input
                 type="email"
                 name="email"
                 id="email"
                 required
-                pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
-                title="Valid email address"
                 className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                placeholder="Enter your email (e.g., user@example.com)"
+                placeholder="Enter your email"
                 value={formData.email}
                 onChange={handleChange}
-                onBlur={handleBlur}
               />
               {errors.email && <div className="error-message">{errors.email}</div>}
             </div>
@@ -230,10 +181,9 @@ const Sign_up = () => {
                 id="password"
                 required
                 className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                placeholder="Enter your password (min 6 characters)"
+                placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleChange}
-                onBlur={handleBlur}
               />
               {errors.password && <div className="error-message">{errors.password}</div>}
             </div>
