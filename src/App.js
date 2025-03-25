@@ -1,47 +1,41 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Landing_Page from './components/LandingPage/LandingPage';
-import Login from './components/Login/Login';
-import Sign_Up from './components/Sign_Up/Sign_Up';
-import Navbar from './components/Navbar/Navbar';
-import './App.css';
+import React from "react";
+import { Link } from "react-router-dom";
+import Navbar from "./components/Navbar/Navbar";  // Correct path
+import './App.css';  // Or the correct CSS path
 
-function App() {
+const LandingPage = () => {
   return (
-    <Router>
-      {/* Navigation Bar - Visible on all pages */}
+    <div className="landing-container">
       <Navbar />
       
-      {/* Main Content Area */}
-      <main className="main-content">
-        <Routes>
-          {/* Landing Page (Home) */}
-          <Route path="/" element={<Landing_Page />} />
-          
-          {/* Authentication Pages */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Sign_up />} />
-          
-          {/* Protected/App Pages */}
-          {/* <Route path="/dashboard" element={<Dashboard />} /> */}
-          {/* <Route path="/appointments" element={<Appointments />} /> */}
-          
-          {/* Error Handling */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </main>
-      
-      {/* Footer can be added here if needed */}
-    </Router>
+      <section className="hero-section">
+        <div className="hero-content">
+          <div data-aos="fade-up" className="flex-hero">
+            <h1>
+              Your Health
+              <br />
+              <span className="text-gradient">Our Responsibility</span>
+            </h1>
+            
+            {/* Visual elements */}
+            <div className="blob-container">
+              <div className="blue blob"></div>
+              <div className="blue1 blob"></div>
+            </div>
+            
+            <h4 className="hero-subtitle">
+              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eaque at
+              quae ducimus. Suscipit omnis quibusdam non cum rem voluptatem!
+            </h4>
+            
+            <Link to="/services" className="cta-link">
+              <button className="button cta-button">Get Started</button>
+            </Link>
+          </div>
+        </div>
+      </section>
+    </div>
   );
-}
+};
 
-// Simple 404 component (create a proper one later)
-const NotFound = () => (
-  <div className="container">
-    <h2>404 - Page Not Found</h2>
-    <Link to="/">Return Home</Link>
-  </div>
-);
-
-export default App;
+export default LandingPage;

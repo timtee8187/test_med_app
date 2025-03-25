@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "../Navbar/Navbar"; // Import Navbar
 import "./LandingPage.css";
 
-const Landing_Page = () => {
+const LandingPage = () => {
   return (
     <div className="landing-container">
       <Navbar /> {/* Navbar added here - will appear at top */}
@@ -36,4 +36,4 @@ const Landing_Page = () => {
   );
 };
 
-export default Landing_Page;
+export default LandingPage;
