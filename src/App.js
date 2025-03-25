@@ -1,41 +1,32 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import Navbar from "./components/Navbar/Navbar";  // Correct path
-import './App.css';  // Or the correct CSS path
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar/Navbar';  // Standard filename
+import LandingPage from './components/LandingPage/Landing_Page';  // Note underscore
+import Login from './components/Login/Login';  // Standard filename
+import SignUp from './components/SignUp/Sign_Up';  // Note underscore
+import './App.css';
 
-const LandingPage = () => {
+function App() {
   return (
-    <div className="landing-container">
-      <Navbar />
-      
-      <section className="hero-section">
-        <div className="hero-content">
-          <div data-aos="fade-up" className="flex-hero">
-            <h1>
-              Your Health
-              <br />
-              <span className="text-gradient">Our Responsibility</span>
-            </h1>
+    <Router>
+      <div className="app">
+        {/* Navbar that appears on every page */}
+        <Navbar />
+        
+        {/* Main content area with routes */}
+        <div className="content">
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
             
-            {/* Visual elements */}
-            <div className="blob-container">
-              <div className="blue blob"></div>
-              <div className="blue1 blob"></div>
-            </div>
-            
-            <h4 className="hero-subtitle">
-              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eaque at
-              quae ducimus. Suscipit omnis quibusdam non cum rem voluptatem!
-            </h4>
-            
-            <Link to="/services" className="cta-link">
-              <button className="button cta-button">Get Started</button>
-            </Link>
-          </div>
+            {/* 404 page fallback */}
+            <Route path="*" element={<div>Page Not Found</div>} />
+          </Routes>
         </div>
-      </section>
-    </div>
+      </div>
+    </Router>
   );
-};
+}
 
-export default LandingPage;
+export default App;
