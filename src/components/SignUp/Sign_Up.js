@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import './SignUp.css';
+import './Sign_Up.css';  // ✅ Correct filename (matches the actual file)
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
