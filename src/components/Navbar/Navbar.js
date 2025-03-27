@@ -39,6 +39,12 @@ function Navbar() {
           <Link to="/appointments">Appointments</Link>
         </li>
         <li className="link">
+          <Link to="/health blogs">Health Blogs</Link>
+        </li>
+        <li className="link">
+          <Link to="/reviews">Reviews</Link>
+        </li>
+        <li className="link">
           <Link to="/signup" className="btn1">Sign Up</Link>
         </li>
         <li className="link">
