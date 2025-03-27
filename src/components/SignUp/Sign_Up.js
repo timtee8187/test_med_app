@@ -10,41 +10,54 @@ const Sign_Up = () => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showerr, setShowerr] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     const register = async (e) => {
         e.preventDefault();
+        setShowerr('');
+        setIsLoading(true);
 
-        const response = await fetch(`${API_URL}/api/auth/register`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                name: name,
-                email: email,
-                password: password,
-                phone: phone,
-            }),
-        });
+        try {
+            const response = await fetch(`${API_URL}/api/auth/register`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name: name,
+                    email: email,
+                    password: password,
+                    phone: phone,
+                }),
+            });
 
-        const json = await response.json();
+            // First check if response is HTML
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.indexOf('text/html') !== -1) {
+    const text = await response.text();
+    throw new Error(`Server returned HTML: ${text.substring(0, 100)}...`); // Show first 100 chars
+}
 
-        if (json.authtoken) {
-            sessionStorage.setItem("auth-token", json.authtoken);
-            sessionStorage.setItem("name", name);
-            sessionStorage.setItem("phone", phone);
-            sessionStorage.setItem("email", email);
-            navigate("/");
-            window.location.reload();
-        } else {
-            if (json.errors) {
-                for (const error of json.errors) {
-                    setShowerr(error.msg);
-                }
-            } else {
-                setShowerr(json.error);
+            const json = await response.json();
+
+            if (!response.ok) {
+                throw new Error(json.error || json.message || 'Registration failed');
             }
+
+            if (json.authtoken) {
+                sessionStorage.setItem("auth-token", json.authtoken);
+                sessionStorage.setItem("name", name);
+                sessionStorage.setItem("phone", phone);
+                sessionStorage.setItem("email", email);
+                navigate("/");
+                window.location.reload();
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+            setShowerr(error.message || 'Registration failed. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -70,6 +83,7 @@ const Sign_Up = () => {
                                 id="name"
                                 className="form-control"
                                 placeholder="Enter your name"
+                                required
                             />
                         </div>
                         
@@ -83,6 +97,7 @@ const Sign_Up = () => {
                                 id="email"
                                 className="form-control"
                                 placeholder="Enter your email"
+                                required
                             />
                         </div>
                         
@@ -96,6 +111,7 @@ const Sign_Up = () => {
                                 id="phone"
                                 className="form-control"
                                 placeholder="Enter your phone number"
+                                required
                             />
                         </div>
                         
@@ -109,6 +125,8 @@ const Sign_Up = () => {
                                 id="password"
                                 className="form-control"
                                 placeholder="Enter your password"
+                                required
+                                minLength="8"
                             />
                             <span 
                                 className="password-visibility"
@@ -118,10 +136,27 @@ const Sign_Up = () => {
                             </span>
                         </div>
                         
-                        {showerr && <div className="err" style={{ color: 'red' }}>{showerr}</div>}
+                        {showerr && (
+                            <div className="alert alert-danger">
+                                <strong>Error:</strong> {showerr}
+                                <br/>
+                                <small>Check your API_URL in config: {API_URL}</small>
+                            </div>
+                        )}
                         
                         <div className="btn-group">
-                            <button type="submit" className="btn btn-primary">Sign Up</button>
+                            <button 
+                                type="submit" 
+                                className="btn btn-primary" 
+                                disabled={isLoading}
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <span className="spinner-border spinner-border-sm me-2"></span>
+                                        Signing Up...
+                                    </>
+                                ) : 'Sign Up'}
+                            </button>
                             <button type="reset" className="btn btn-danger">Clear</button>
                         </div>
                     </form>
