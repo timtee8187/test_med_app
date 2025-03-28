@@ -1,20 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { API_URL } from '../../config';
 import './Login.css';
-import { Link } from 'react-router-dom';
 
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
-
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [apiError, setApiError] = useState('');
+  const navigate = useNavigate();
+
+  // Verify API connection on component mount
+  useEffect(() => {
+    console.log("Using API URL:", API_URL);
+  }, []);
 
   const validateForm = () => {
     const newErrors = {};
     
-    // Enhanced email validation with specific error messages
     if (!formData.email) {
       newErrors.email = 'Email address is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -27,7 +33,6 @@ const Login = () => {
       }
     }
     
-    // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
@@ -38,79 +43,61 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const validateField = (fieldName, value) => {
-    const newErrors = { ...errors };
-    
-    if (fieldName === 'email') {
-      if (!value) {
-        newErrors.email = 'Email address is required';
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-        if (value.indexOf('@') === -1) {
-          newErrors.email = 'Email must contain an @ symbol';
-        } else if (value.indexOf('.') === -1) {
-          newErrors.email = 'Email must contain a domain (e.g., .com, .org)';
-        } else {
-          newErrors.email = 'Please enter a valid email address (e.g., user@example.com)';
-        }
-      } else {
-        delete newErrors.email;
-      }
-    }
-    
-    if (fieldName === 'password') {
-      if (!value) {
-        newErrors.password = 'Password is required';
-      } else if (value.length < 6) {
-        newErrors.password = 'Password must be at least 6 characters';
-      } else {
-        delete newErrors.password;
-      }
-    }
-    
-    setErrors(newErrors);
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-    
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors({
-        ...errors,
-        [name]: null
-      });
-    }
-  };
-
-  const handleBlur = (e) => {
-    const { name, value } = e.target;
-    validateField(name, value);
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      setIsSubmitting(true);
-      // Form is valid - proceed with login
-      console.log('Login form submitted:', formData);
-      // Simulate API call
-      setTimeout(() => {
-        setIsSubmitting(false);
-        alert('Login successful!');
-      }, 1000);
-    }
-  };
+    setApiError('');
+    
+    if (!validateForm()) return;
 
-  const handleReset = () => {
-    setFormData({
-      email: '',
-      password: ''
-    });
-    setErrors({});
+    setIsSubmitting(true);
+    
+    try {
+      // Test API connection first
+      const healthCheck = await fetch(`${API_URL}/health`);
+      if (!healthCheck.ok) {
+        throw new Error('API server is not responding');
+      }
+
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      // Handle non-JSON responses
+      if (!response.headers.get('content-type')?.includes('application/json')) {
+        throw new Error('Invalid server response');
+      }
+
+      const json = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(json.error || json.message || 'Login failed');
+      }
+
+      if (json.authtoken) {
+        sessionStorage.setItem('auth-token', json.authtoken);
+        sessionStorage.setItem('email', formData.email);
+        navigate('/');
+      } else {
+        throw new Error('Authentication token missing in response');
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setApiError(error.message || 'An error occurred during login');
+      
+      // Special handling for CORS errors
+      if (error.message.includes('Failed to fetch')) {
+        setApiError('Cannot connect to server. Please check your connection or try again later.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -122,7 +109,15 @@ const Login = () => {
         <div className="login-text">
           Are you a new member? <span><Link to="/signup" style={{ color: '#2190FF' }}>Sign Up Here</Link></span>
         </div>
-        <br />
+        
+        {apiError && (
+          <div className="alert alert-danger" style={{ margin: '15px 0' }}>
+            <strong>Error:</strong> {apiError}
+            <br />
+            <small>Attempting to connect to: {API_URL}</small>
+          </div>
+        )}
+
         <div className="login-form">
           <form onSubmit={handleSubmit}>
             <div className="form-group">
@@ -131,14 +126,13 @@ const Login = () => {
                 type="email"
                 name="email"
                 id="email"
-                required
-                pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
-                title="Valid email address"
                 className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                placeholder="Enter your email (e.g., user@example.com)"
+                placeholder="Enter your email"
                 value={formData.email}
-                onChange={handleChange}
-                onBlur={handleBlur}
+                onChange={(e) => {
+                  setFormData({...formData, email: e.target.value});
+                  if (errors.email) setErrors({...errors, email: ''});
+                }}
               />
               {errors.email && <div className="error-message">{errors.email}</div>}
             </div>
@@ -149,12 +143,13 @@ const Login = () => {
                 type="password"
                 name="password"
                 id="password"
-                required
                 className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                placeholder="Enter your password (min 6 characters)"
+                placeholder="Enter your password"
                 value={formData.password}
-                onChange={handleChange}
-                onBlur={handleBlur}
+                onChange={(e) => {
+                  setFormData({...formData, password: e.target.value});
+                  if (errors.password) setErrors({...errors, password: ''});
+                }}
               />
               {errors.password && <div className="error-message">{errors.password}</div>}
             </div>
@@ -165,19 +160,23 @@ const Login = () => {
                 className="btn btn-primary mb-2 mr-1 waves-effect waves-light"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Logging in...' : 'Login'}
+                {isSubmitting ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Logging in...
+                  </>
+                ) : 'Login'}
               </button>
               <button 
                 type="button"
                 className="btn btn-danger mb-2 waves-effect waves-light"
-                onClick={handleReset}
+                onClick={() => {
+                  setFormData({ email: '', password: '' });
+                  setErrors({});
+                }}
               >
                 Reset
               </button>
-            </div>
-            <br />
-            <div className="login-text">
-              <Link to="/forgot-password">Forgot Password?</Link>
             </div>
           </form>
         </div>

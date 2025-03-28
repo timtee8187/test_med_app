@@ -1,89 +1,90 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import './Navbar.css';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import "./Navbar.css";
 
-function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState('');
-  const navigate = useNavigate();
+const Navbar = () => {
+    const [click, setClick] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [username, setUsername] = useState("");
+    
+    const handleClick = () => setClick(!click);
 
-  useEffect(() => {
-    const userData = JSON.parse(sessionStorage.getItem('userData'));
-    if (userData) {
-      setIsLoggedIn(true);
-      setUsername(userData.email.split('@')[0]);
+    const handleLogout = () => {
+        sessionStorage.removeItem("auth-token");
+        sessionStorage.removeItem("name");
+        sessionStorage.removeItem("email");
+        sessionStorage.removeItem("phone");
+        localStorage.removeItem("doctorData");
+        setIsLoggedIn(false);
+        
+        // Remove the reviewFormData from local storage
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith("reviewFormData_")) {
+                localStorage.removeItem(key);
+            }
+        }
+        window.location.reload();
     }
-  }, []);
 
-  const handleLogout = () => {
-    sessionStorage.clear();
-    setIsLoggedIn(false);
-    navigate('/login');
-  };
+    useEffect(() => { 
+        const storedemail = sessionStorage.getItem("email");
+        if (storedemail) {
+            setIsLoggedIn(true);
+            setUsername(storedemail.split('@')[0]); // Extract username from email
+        }
+    }, []);
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
-  return (
-    <nav>
-      <div className="nav__logo">
-        <Link to="/">
-          StayHealthy
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="26"
-            width="26"
-            viewBox="0 0 1000 1000"
-            style={{ fill: '#3685fb' }}
-          >
-            {/* Your SVG */}
-          </svg>
-        </Link>
-        <span>.</span>
-      </div>
-
-      <div className="nav__icon" onClick={toggleMenu}>
-        <i className={`fa ${isMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
-      </div>
-
-      <ul className={`nav__links ${isMenuOpen ? 'active' : ''}`}>
-        <li className="link">
-          <Link to="/">Home</Link>
-        </li>
-        <li className="link">
-          <Link to="/appointments">Appointments</Link>
-        </li>
-        <li className="link">
-          <Link to="/health-blogs">Health Blogs</Link>
-        </li>
-        <li className="link">
-          <Link to="/reviews">Reviews</Link>
-        </li>
-
-        {isLoggedIn ? (
-          <li className="welcome-user">
-            <span>Welcome, {username}</span>
-            <ul className="dropdown-menu">
-              <li>
-                <button onClick={handleLogout} className="btn2">
-                  Logout
-                </button>
-              </li>
+    return (
+        <nav>
+            <div className="nav__logo">
+                <Link to="/">
+                    StayHealthy <i style={{color:'#2190FF'}} className="fa fa-user-md"></i>
+                </Link>
+                <span>.</span>
+            </div>
+            <div className="nav__icon" onClick={handleClick}>
+                <i className={click ? "fa fa-times" : "fa fa-bars"}></i>
+            </div>
+            <ul className={click ? 'nav__links active' : 'nav__links'}>
+                <li className="link">
+                    <Link to="/">Home</Link>
+                </li>
+                <li className="link">
+                    <Link to="/search/doctors">Appointments</Link>
+                </li>
+                <li className="link">
+                    <Link to="/healthblog">Health Blog</Link>
+                </li>
+                <li className="link">
+                    <Link to="/reviews">Reviews</Link>
+                </li>
+                {isLoggedIn ? (
+                    <>
+                        <li className="link">
+                            <span style={{ marginRight: "10px" }}>Welcome, {username}</span>
+                            <button className="btn2" onClick={handleLogout}>
+                                Logout
+                            </button>
+                        </li>
+                    </>
+                ) : (
+                    <>
+                        <li className="link">
+                            <Link to="/signup">
+                                <button className="btn1">Sign Up</button>
+                            </Link>
+                        </li>
+                        <li className="link">
+                            <Link to="/login">
+                                <button className="btn1">Login</button>
+                            </Link>
+                        </li>
+                    </>
+                )}
             </ul>
-          </li>
-        ) : (
-          <>
-            <li className="link">
-              <Link to="/signup" className="btn1">Sign Up</Link>
-            </li>
-            <li className="link">
-              <Link to="/login" className="btn1">Login</Link>
-            </li>
-          </>
-        )}
-      </ul>
-    </nav>
-  );
-}
+        </nav>
+    );
+};
 
 export default Navbar;

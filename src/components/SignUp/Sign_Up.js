@@ -10,12 +10,31 @@ const Sign_Up = () => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showerr, setShowerr] = useState('');
+    const [phoneError, setPhoneError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+
+    const validatePhone = (phoneNumber) => {
+        if (!phoneNumber) {
+            setPhoneError('Phone number is required');
+            return false;
+        } else if (!/^\d{10}$/.test(phoneNumber)) {
+            setPhoneError('Phone number must be 10 digits');
+            return false;
+        }
+        setPhoneError('');
+        return true;
+    };
 
     const register = async (e) => {
         e.preventDefault();
         setShowerr('');
+        
+        // Validate phone first
+        if (!validatePhone(phone)) {
+            return;
+        }
+
         setIsLoading(true);
 
         try {
@@ -32,12 +51,11 @@ const Sign_Up = () => {
                 }),
             });
 
-            // First check if response is HTML
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.indexOf('text/html') !== -1) {
-    const text = await response.text();
-    throw new Error(`Server returned HTML: ${text.substring(0, 100)}...`); // Show first 100 chars
-}
+                const text = await response.text();
+                throw new Error(`Server returned HTML: ${text.substring(0, 100)}...`);
+            }
 
             const json = await response.json();
 
@@ -58,6 +76,17 @@ const Sign_Up = () => {
             setShowerr(error.message || 'Registration failed. Please try again.');
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handlePhoneChange = (e) => {
+        const value = e.target.value;
+        setPhone(value);
+        // Validate as user types (optional)
+        if (value && !/^\d{0,10}$/.test(value)) {
+            setPhoneError('Only numbers allowed');
+        } else {
+            setPhoneError('');
         }
     };
 
@@ -105,14 +134,16 @@ const Sign_Up = () => {
                             <label htmlFor="phone">Phone Number</label>
                             <input
                                 value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
+                                onChange={handlePhoneChange}
                                 type="tel"
                                 name="phone"
                                 id="phone"
-                                className="form-control"
-                                placeholder="Enter your phone number"
+                                className={`form-control ${phoneError ? 'is-invalid' : ''}`}
+                                placeholder="Enter your 10-digit phone number"
                                 required
+                                maxLength="10"
                             />
+                            {phoneError && <div className="invalid-feedback">{phoneError}</div>}
                         </div>
                         
                         <div className="form-group">
