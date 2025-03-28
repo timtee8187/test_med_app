@@ -1,38 +1,42 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 
 const Navbar = () => {
     const [click, setClick] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [username, setUsername] = useState("");
-    
+    const navigate = useNavigate();
+
     const handleClick = () => setClick(!click);
 
     const handleLogout = () => {
         sessionStorage.removeItem("auth-token");
-        sessionStorage.removeItem("name");
         sessionStorage.removeItem("email");
-        sessionStorage.removeItem("phone");
-        localStorage.removeItem("doctorData");
         setIsLoggedIn(false);
-        
-        // Remove the reviewFormData from local storage
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key.startsWith("reviewFormData_")) {
-                localStorage.removeItem(key);
-            }
-        }
-        window.location.reload();
-    }
+        setUsername("");
+        navigate("/login");
+    };
 
     useEffect(() => { 
-        const storedemail = sessionStorage.getItem("email");
-        if (storedemail) {
-            setIsLoggedIn(true);
-            setUsername(storedemail.split('@')[0]); // Extract username from email
-        }
+        const checkAuthStatus = () => {
+            const authToken = sessionStorage.getItem("auth-token");
+            const email = sessionStorage.getItem("email");
+            
+            if (authToken && email) {
+                setIsLoggedIn(true);
+                setUsername(email.split('@')[0]);
+            } else {
+                setIsLoggedIn(false);
+                setUsername("");
+            }
+        };
+
+        checkAuthStatus();
+        
+        // Listen for storage changes (for logout from other tabs)
+        window.addEventListener('storage', checkAuthStatus);
+        return () => window.removeEventListener('storage', checkAuthStatus);
     }, []);
 
     return (
