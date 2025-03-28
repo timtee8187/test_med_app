@@ -134,7 +134,7 @@ nav {
         border-radius: 0.5rem;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         z-index: 999;
-        animation: slideDown 0.5s ease-in-out; /* Animation effect */
+        animation: slideDown 0.5s ease-in-out;
     }
 }
 
@@ -159,8 +159,8 @@ nav {
 }
 
 .btn1:hover {
-    background-color: #3685fb; /* Hover effect */
-    color: white; /* Hover effect */
+    background-color: #3685fb;
+    color: white;
 }
 
 .btn2 {
@@ -169,14 +169,43 @@ nav {
     color: black;
     border-radius: 50px;
     height:30px;
-    display:flex; /* Align items and justify content */
-    align-items:center; /* Align items and justify content */
-    justify-content:center; /* Align items and justify content */
-    margin-top:3px; /* Margin from top */
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-top:3px;
 }
 
 .btn2:hover {
-    background-color:#3685fb; /* Hover effect */
-    color:white; /* Hover effect */
+    background-color:#3685fb;
+    color:white;
 }
-  
+
+/* ===== NEW ADDITIONS FOR AUTH ===== */
+.welcome-user {
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+}
+
+.dropdown-menu button {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px 16px;
+    color: #333;
+    font: inherit;
+}
+
+@media (max-width: 768px) {
+    .welcome-user {
+        width: 100%;
+        padding: 0.5rem 1rem;
+    }
+    .dropdown-menu {
+        position: static;
+        box-shadow: none;
+        width: 100%;
+    }
+}
