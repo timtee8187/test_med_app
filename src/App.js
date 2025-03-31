@@ -4,6 +4,7 @@ import Navbar from './components/Navbar/Navbar';  // Standard filename
 import LandingPage from './components/LandingPage/Landing_Page';  // Note underscore
 import Login from './components/Login/Login';  // Standard filename
 import SignUp from './components/SignUp/Sign_Up';  // Note underscore
+import InstantConsultation from './components/InstantConsultationBooking/InstantConsultation';
 import './App.css';
 
 function App() {
@@ -19,7 +20,8 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
-            
+            <Route path="/InstantConsultation" element={<InstantConsultation />} />
+
             {/* 404 page fallback */}
             <Route path="*" element={<div>Page Not Found</div>} />
           </Routes>

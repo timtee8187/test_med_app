@@ -63,6 +63,9 @@ const Navbar = () => {
                 <li className="link">
                     <Link to="/reviews">Reviews</Link>
                 </li>
+                <li className="link">
+                    <Link to="/InstantConsultation">Booking</Link>
+                </li>
                 {isLoggedIn ? (
                     <>
                         <li className="link">
