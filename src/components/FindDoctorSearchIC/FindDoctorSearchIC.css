@@ -1,3 +1,4 @@
+/* LOCATION SEARCH BOX (unchanged) */
 .location-search-box {
     display: flex;
     align-items: center;
@@ -64,12 +65,9 @@
 
 .search-location-result-item:hover {
     background-color: #f0f0f5;
-
 }
 
-
-
-
+/* DOCTOR SEARCH BOX (optimized but structure preserved) */
 .doctor-search-box {
     display: flex;
     align-items: center;
@@ -110,8 +108,8 @@
     height: 40px;
     border: 1px solid rgb(59, 58, 58);
     z-index: -99;
-
 }
+
 .search-doctor-input-results {
     position: absolute;
     top: 55%;
@@ -121,6 +119,8 @@
     height: 420px;
     margin-top: 2px;
     border: 1px solid #555;
+    overflow-y: auto; /* Added scroll for many results */
+    background: white; /* Ensure background covers content */
 }
 
 .search-doctor-result-item {
@@ -159,6 +159,8 @@
     text-transform: uppercase;
     justify-self: flex-end;
 }
+
+/* CONTAINER STYLES (unchanged) */
 .home-search-container {
     /* width: 712px; */
     padding: 20px 0;
@@ -170,6 +172,7 @@
     /* height: 0 auto; */
     overflow: hidden;
 } 
+
 .finddoctor .mainimg{
     width: 312px;
     height: 312px;

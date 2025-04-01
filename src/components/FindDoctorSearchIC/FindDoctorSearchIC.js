@@ -1,25 +1,32 @@
 import React, { useState } from 'react';
 import './FindDoctorSearchIC.css';
-import { useNavigate } from 'react-router-dom'; // Removed unused Navigate import
+import { useNavigate } from 'react-router-dom';
 
 const initSpeciality = [
-    'Dentist', 'Gynecologist/obstetrician', 'General Physician', 
-    'Dermatologist', 'Ear-nose-throat (ent) Specialist', 
-    'Homeopath', 'Ayurveda'
+    'Dentist', 
+    'Gynecologist/obstetrician', 
+    'General Physician', 
+    'Dermatologist', 
+    'Ear-nose-throat (ent) Specialist', 
+    'Homeopath', 
+    'Ayurveda'
 ];
 
 const FindDoctorSearchIC = () => {
     const [doctorResultHidden, setDoctorResultHidden] = useState(true);
     const [searchDoctor, setSearchDoctor] = useState('');
-    const [specialities] = useState(initSpeciality); // Removed setSpecialities since it's not used
+    const [specialities] = useState(initSpeciality);
     const navigate = useNavigate();
 
     const handleDoctorSelect = (speciality) => {
         setSearchDoctor(speciality);
         setDoctorResultHidden(true);
         navigate(`/instant-consultation?speciality=${speciality}`);
-        window.location.reload();
     };
+
+    const filteredSpecialities = specialities.filter(spec =>
+        spec.toLowerCase().includes(searchDoctor.toLowerCase())
+    );
 
     return (
         <div className='finddoctor'>
@@ -34,20 +41,24 @@ const FindDoctorSearchIC = () => {
                             type="text" 
                             className="search-doctor-input-box" 
                             placeholder="Search doctors, clinics, hospitals, etc." 
-                            onFocus={() => setDoctorResultHidden(false)} 
-                            onBlur={() => setDoctorResultHidden(true)} 
-                            value={searchDoctor} 
-                            onChange={(e) => setSearchDoctor(e.target.value)} 
+                            value={searchDoctor}
+                            onChange={(e) => {
+                                setSearchDoctor(e.target.value);
+                                setDoctorResultHidden(false);
+                            }}
+                            onFocus={() => setDoctorResultHidden(false)}
+                            onBlur={() => setTimeout(() => setDoctorResultHidden(true), 200)}
                         />
                         
                         <div className="findiconimg">
                             <img className='findIcon' src={process.env.PUBLIC_URL + '/images/search.svg'} alt=""/>
                         </div>
-                        <div className="search-doctor-input-results" hidden={doctorResultHidden}>
-                            {specialities.map(speciality => (
+                        
+                        <div className="search-doctor-input-results" hidden={doctorResultHidden || filteredSpecialities.length === 0}>
+                            {filteredSpecialities.map(speciality => (
                                 <div 
                                     className="search-doctor-result-item" 
-                                    key={speciality} 
+                                    key={speciality}
                                     onMouseDown={() => handleDoctorSelect(speciality)}
                                 >
                                     <span>

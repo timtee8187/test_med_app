@@ -4,7 +4,8 @@ import Navbar from './components/Navbar/Navbar';  // Standard filename
 import LandingPage from './components/LandingPage/Landing_Page';  // Note underscore
 import Login from './components/Login/Login';  // Standard filename
 import SignUp from './components/SignUp/Sign_Up';  // Note underscore
-import InstantConsultation from './components/InstantConsultationBooking/InstantConsultation';
+import InstantConsultation from './components/InstantConsultation/InstantConsultation';
+
 import './App.css';
 
 function App() {
