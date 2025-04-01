@@ -1,0 +1,133 @@
+/* Existing styles from your original CSS */
+.finddoctor {
+    padding: 20px;
+    background-color: #f9f9f9;
+    min-height: 100vh;
+}
+
+.finddoctor h1 {
+    color: #2d3e50;
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+}
+
+.home-search-container {
+    margin: 30px 0;
+}
+
+.doctor-search-box {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.search-doctor-input-box {
+    width: 100%;
+    padding: 15px 20px;
+    padding-right: 50px;
+    border: 1px solid #ddd;
+    border-radius: 30px;
+    font-size: 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.search-doctor-input-box:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 2px 15px rgba(74, 144, 226, 0.3);
+}
+
+.findiconimg {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.findIcon {
+    width: 20px;
+    height: 20px;
+}
+
+.search-doctor-input-results {
+    position: absolute;
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    z-index: 100;
+    margin-top: 5px;
+}
+
+.search-doctor-result-item {
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.search-doctor-result-item:hover {
+    background-color: #f5f5f5;
+}
+
+.search-doctor-result-item span:first-child {
+    margin-right: 15px;
+}
+
+.search-doctor-result-item span:last-child {
+    margin-left: auto;
+    font-size: 12px;
+    color: #666;
+    background: #f0f0f0;
+    padding: 3px 8px;
+    border-radius: 10px;
+}
+
+/* New filter styles */
+.filter-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.filter-select {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    font-size: 14px;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    cursor: pointer;
+    outline: none;
+}
+
+.filter-select:hover {
+    border-color: #4a90e2;
+}
+
+@media (max-width: 768px) {
+    .finddoctor h1 {
+        font-size: 1.8rem;
+    }
+    
+    .search-doctor-input-box {
+        padding: 12px 15px;
+        padding-right: 45px;
+    }
+
+    .filter-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .filter-select {
+        width: 80%;
+        margin: 5px 0 !important;
+    }
+}
