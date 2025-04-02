@@ -2,20 +2,24 @@ import React, { useState } from 'react';
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import './DoctorCardIC.css';
-import AppointmentFormIC from '../AppointmentFormIC/AppointmentFormIC';
+import AppointmentFormIC from '../AppointmentFormIC/AppointmentFormIC'; // Updated import
 import { v4 as uuidv4 } from 'uuid';
 
 const DoctorCardIC = ({ name, speciality, experience, ratings, profilePic }) => {
   const [showModal, setShowModal] = useState(false);
   const [appointments, setAppointments] = useState([]);
 
-  // Removed unused handleBooking function since we're using onClick directly
   const handleCancel = (appointmentId) => {
     setAppointments(prev => prev.filter(app => app.id !== appointmentId));
   };
 
   const handleFormSubmit = (appointmentData) => {
-    setAppointments(prev => [...prev, { id: uuidv4(), ...appointmentData }]);
+    setAppointments(prev => [...prev, { 
+      id: uuidv4(), 
+      ...appointmentData,
+      doctorName: name,
+      doctorSpeciality: speciality
+    }]);
     setShowModal(false);
   };
 
@@ -36,14 +40,14 @@ const DoctorCardIC = ({ name, speciality, experience, ratings, profilePic }) => 
         </div>
       </div>
 
-      {/* Booking Section - Now using setShowModal directly */}
+      {/* Booking Section - Updated to work with AppointmentFormIC */}
       <div className="doctor-card-options-container">
         <Popup
           style={{ backgroundColor: '#FFFFFF' }}
           trigger={
             <button 
               className={`book-appointment-btn ${appointments.length > 0 ? 'cancel-appointment' : ''}`}
-              onClick={() => setShowModal(true)}  // Directly using setShowModal here
+              onClick={() => setShowModal(true)}
             >
               {appointments.length > 0 ? 'Cancel Appointment' : 'Book Appointment'}
               <div>No Booking Fee</div>
@@ -55,7 +59,7 @@ const DoctorCardIC = ({ name, speciality, experience, ratings, profilePic }) => 
         >
           {close => (
             <div className="doctorbg" style={{ height: '100vh', overflow: 'scroll' }}>
-              {/* Modal content remains unchanged */}
+              {/* Doctor Info Display - Unchanged */}
               <div>
                 <div className="doctor-card-profile-image-container">
                   <svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" fill="currentColor" className="bi bi-person-fill" viewBox="0 0 16 16">
@@ -77,6 +81,8 @@ const DoctorCardIC = ({ name, speciality, experience, ratings, profilePic }) => 
                     <div className="bookedInfo" key={appointment.id}>
                       <p>Name: {appointment.name}</p>
                       <p>Phone: {appointment.phoneNumber}</p>
+                      <p>Date: {appointment.date}</p>
+                      <p>Time: {appointment.timeSlot}</p>
                       <button 
                         onClick={() => {
                           handleCancel(appointment.id);
@@ -90,7 +96,7 @@ const DoctorCardIC = ({ name, speciality, experience, ratings, profilePic }) => 
                   ))}
                 </div>
               ) : (
-                <AppointmentFormIC 
+                <AppointmentFormIC  // Updated component name
                   doctorName={name} 
                   doctorSpeciality={speciality} 
                   onSubmit={(data) => {
