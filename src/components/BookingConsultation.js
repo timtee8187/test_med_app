@@ -4,7 +4,7 @@ import FindDoctorSearchIC from './FindDoctorSearchIC/FindDoctorSearchIC'; // Ver
 import DoctorCardIC from './DoctorCardIC/DoctorCardIC'; // Verified path
 import './BookingConsultation.css'; // Need to create this file
 
-const BookingConsultation = () => {
+const InstantConsultation = () => {
     const [searchParams] = useSearchParams();
     const [doctors, setDoctors] = useState([]);
     const [filteredDoctors, setFilteredDoctors] = useState([]);
@@ -48,37 +48,25 @@ const BookingConsultation = () => {
 
     return (
         <center>
-            <div className="booking-container">
-                <h1>Book Your Consultation</h1>
-                <div className="search-container">
-                    <FindDoctorSearchIC onSearch={handleSearch} />
-                </div>
-                <div className="results-container">
-                    {isSearched ? (
-                        <>
-                            <h2>{filteredDoctors.length} doctors available {searchParams.get('location') ? `in ${searchParams.get('location')}` : ''}</h2>
-                            <h3>Select a doctor to book your appointment</h3>
+            <div className="searchpage-container">
+                <FindDoctorSearchIC onSearch={handleSearch} />
+                <div className="search-results-container">
+                    {isSearched && (
+                        <center>
+                            <h2>{filteredDoctors.length} doctors are available {searchParams.get('location')}</h2>
+                            <h3>Book appointments with minimum wait-time & verified doctor details</h3>
                             {filteredDoctors.length > 0 ? (
                                 filteredDoctors.map(doctor => (
                                     <DoctorCardIC 
-                                        className="doctor-card" 
-                                        key={`${doctor.name}-${doctor.speciality}`}
-                                        name={doctor.name}
-                                        speciality={doctor.speciality}
-                                        experience={doctor.experience}
-                                        ratings={doctor.ratings}
-                                        profilePic={doctor.profilePic}
+                                        className="doctorcard" 
+                                        {...doctor} 
+                                        key={doctor.name} 
                                     />
                                 ))
                             ) : (
-                                <p>No doctors found matching your search.</p>
+                                <p>No doctors found.</p>
                             )}
-                        </>
-                    ) : (
-                        <div className="search-prompt">
-                            <i className="fa fa-search" style={{fontSize: '48px', color: '#3f51b5'}}></i>
-                            <p>Search for a doctor to begin your booking</p>
-                        </div>
+                        </center>
                     )}
                 </div>
             </div>
@@ -86,4 +74,4 @@ const BookingConsultation = () => {
     );
 };
 
-export default BookingConsultation;
+export default InstantConsultation;

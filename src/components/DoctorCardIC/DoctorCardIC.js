@@ -3,93 +3,100 @@ import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import './DoctorCardIC.css';
 import AppointmentFormIC from '../AppointmentFormIC/AppointmentFormIC';
-import { v4 as uuidv4 } from 'uuid';
 
-const DoctorCardIC = ({ name, speciality, experience, ratings, profilePic }) => {
-  const [showModal, setShowModal] = useState(false);
-  const [appointments, setAppointments] = useState([]);
+const DoctorCardIC = ({ 
+    name, 
+    speciality, 
+    experience, 
+    ratings, 
+    profilePic,
+    consultationFees 
+}) => {
+    const [isBooked, setIsBooked] = useState(false);
+    // Removed unused showModal state since we're using Popup's built-in open state
 
-  // Cancel appointment handler
-  const handleCancel = (appointmentId) => {
-    setAppointments(prev => prev.filter(app => app.id !== appointmentId));
-  };
+    const handleBooking = (formData) => {
+        console.log('Booking confirmed:', { doctor: name, ...formData });
+        setIsBooked(true);
+    };
 
-  // Book appointment handler
-  const handleFormSubmit = (appointmentData) => {
-    setAppointments(prev => [...prev, { 
-      id: uuidv4(), 
-      ...appointmentData,
-      doctorName: name,
-      doctorSpeciality: speciality
-    }]);
-    setShowModal(false); // Close modal after booking
-  };
+    const handleCancel = () => {
+        setIsBooked(false);
+    };
 
-  return (
-    <div className="doctor-card-container">
-      {/* Doctor Info Section */}
-      <div className="doctor-card-details-container">
-        <div className="doctor-card-profile-image-container">
-          <svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" fill="currentColor" className="bi bi-person-fill" viewBox="0 0 16 16">
-            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
-          </svg>
-        </div>
-        <div className="doctor-card-details">
-          <div className="doctor-card-detail-name">{name}</div>
-          <div className="doctor-card-detail-speciality">{speciality}</div>
-          <div className="doctor-card-detail-experience">{experience} years experience</div>
-          <div className="doctor-card-detail-consultationfees">Ratings: {ratings}</div>
-        </div>
-      </div>
-
-      {/* Booking/Cancellation Section */}
-      <div className="doctor-card-options-container">
-        {appointments.length > 0 ? (
-          // Cancel Appointment Button (shown when booked)
-          <button 
-            className="cancel-appointment-btn"
-            onClick={() => handleCancel(appointments[0].id)} // Cancel the first (only) appointment
-          >
-            Cancel Appointment
-            <div>No Cancellation Fee</div>
-          </button>
-        ) : (
-          // Book Appointment Button (shown when not booked)
-          <Popup
-            trigger={
-              <button className="book-appointment-btn">
-                Book Appointment
-                <div>No Booking Fee</div>
-              </button>
-            }
-            modal
-            open={showModal}
-            onClose={() => setShowModal(false)}
-          >
-            {close => (
-              <div className="doctorbg">
-                {/* Doctor Info in Modal */}
-                <div className="doctor-card-details">
-                  <div className="doctor-card-detail-name">{name}</div>
-                  <div className="doctor-card-detail-speciality">{speciality}</div>
+    return (
+        <div className="doctor-card-container">
+            <div className="doctor-card-details-container">
+                <div className="doctor-card-profile-image-container">
+                    {profilePic ? (
+                        <img src={profilePic} alt={name} />
+                    ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="#e0e0e0">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                    )}
                 </div>
-
-                {/* Appointment Form */}
-                <AppointmentFormIC
-                  doctorName={name}
-                  doctorSpeciality={speciality}
-                  onSubmit={(data) => {
-                    handleFormSubmit(data);
-                    close();
-                  }}
-                />
-              </div>
-            )}
-          </Popup>
-        )}
-      </div>
-    </div>
-  );
+                
+                <div className="doctor-card-details">
+                    <div className="doctor-card-detail-name">{name}</div>
+                    <div className="doctor-card-detail-speciality">{speciality}</div>
+                    <div className="doctor-card-detail-experience">{experience} years experience</div>
+                    <div className="doctor-card-detail-consultationfees">
+                        Consultation: {consultationFees}
+                    </div>
+                    <div className="ratings">Rating: {ratings}</div>
+                </div>
+            </div>
+            
+            <div className="booking-actions">
+                {isBooked ? (
+                    <button 
+                        className="cancel-appointment-btn"
+                        onClick={handleCancel}
+                    >
+                        Cancel Appointment
+                        <div>No Cancellation Fee</div>
+                    </button>
+                ) : (
+                    <Popup
+                        trigger={
+                            <button className="book-appoinment-btn">
+                                Book Appointment
+                                <div>No Booking Fee</div>
+                            </button>
+                        }
+                        modal
+                        nested
+                        contentStyle={{
+                            width: 'auto',
+                            maxWidth: '500px',
+                            borderRadius: '5px',
+                            padding: '20px'
+                        }}
+                        overlayStyle={{
+                            background: 'rgba(0,0,0,0.5)'
+                        }}
+                    >
+                        {close => (
+                            <div className="modal-content">
+                                <h3>Book Appointment with {name}</h3>
+                                <p>{speciality}</p>
+                                <AppointmentFormIC
+                                    doctorName={name}
+                                    doctorSpeciality={speciality}
+                                    onSubmit={(data) => {
+                                        handleBooking(data);
+                                        close();
+                                    }}
+                                    onCancel={close}
+                                />
+                            </div>
+                        )}
+                    </Popup>
+                )}
+            </div>
+        </div>
+    );
 };
 
 export default DoctorCardIC;

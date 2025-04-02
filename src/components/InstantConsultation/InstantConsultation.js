@@ -9,68 +9,125 @@ const InstantConsultation = () => {
     const [doctors, setDoctors] = useState([]);
     const [filteredDoctors, setFilteredDoctors] = useState([]);
     const [isSearched, setIsSearched] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
     
-    const getDoctorsDetails = useCallback(() => {
-        fetch('https://api.npoint.io/9a5543d36f1460da2f63')
-        .then(res => res.json())
-        .then(data => {
+    const getDoctorsDetails = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+        
+        try {
+            const response = await fetch('https://api.npoint.io/9a5543d36f1460da2f63');
+            
+            if (!response.ok) throw new Error('Failed to fetch doctors');
+            
+            const data = await response.json();
+            
+            if (!Array.isArray(data)) throw new Error('Invalid data format');
+            
+            const processedDoctors = data.map(doctor => ({
+                id: doctor.id || Math.random().toString(36).slice(2),
+                name: doctor.name || 'Dr. Unknown',
+                speciality: doctor.speciality || 'General Physician',
+                experience: doctor.experience || 0,
+                ratings: doctor.ratings || 0,
+                profilePic: doctor.profilePic || '',
+                consultationFees: doctor.consultationFees || 'Not specified'
+            }));
+            
+            setDoctors(processedDoctors);
+            
             if (searchParams.get('speciality')) {
-                const filtered = data.filter(doctor => 
-                    doctor.speciality.toLowerCase() === searchParams.get('speciality').toLowerCase()
+                const filtered = processedDoctors.filter(doctor => 
+                    doctor.speciality.toLowerCase().includes(searchParams.get('speciality').toLowerCase())
                 );
                 setFilteredDoctors(filtered);
                 setIsSearched(true);
-            } else {
-                setFilteredDoctors([]);
-                setIsSearched(false);
             }
-            setDoctors(data);
-        })
-        .catch(err => console.error('Error fetching doctors:', err));
+        } catch (err) {
+            console.error('Error:', err);
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
     }, [searchParams]);
 
     const handleSearch = (searchText) => {
-        if (searchText === '') {
+        const searchTerm = searchText.toLowerCase().trim();
+        
+        if (!searchTerm) {
             setFilteredDoctors([]);
             setIsSearched(false);
-        } else {
-            const filtered = doctors.filter(
-                (doctor) => doctor.speciality.toLowerCase().includes(searchText.toLowerCase())
-            );
-            setFilteredDoctors(filtered);
-            setIsSearched(true);
+            return;
         }
+        
+        const results = doctors.filter(doctor =>
+            doctor.speciality.toLowerCase().includes(searchTerm) ||
+            doctor.name.toLowerCase().includes(searchTerm)
+        );
+        
+        setFilteredDoctors(results);
+        setIsSearched(true);
     };
 
     useEffect(() => {
         getDoctorsDetails();
     }, [getDoctorsDetails]);
 
-    return (
-        <center>
+    if (isLoading) {
+        return (
             <div className="searchpage-container">
-                <FindDoctorSearchIC onSearch={handleSearch} />
-                <div className="search-results-container">
-                    {isSearched && (
-                        <center>
-                            <h2>{filteredDoctors.length} doctors are available {searchParams.get('location')}</h2>
-                            <h3>Book appointments with minimum wait-time & verified doctor details</h3>
+                <p>Loading doctors...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="searchpage-container">
+                <p className="error-message">{error}</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="searchpage-container">
+            <FindDoctorSearchIC onSearch={handleSearch} />
+            
+            <div className="search-results-container">
+                {isSearched ? (
+                    <>
+                        <h2>{filteredDoctors.length} doctors available</h2>
+                        <h3>Book appointments with minimum wait-time</h3>
+                        <div className="doctors-grid">
                             {filteredDoctors.length > 0 ? (
                                 filteredDoctors.map(doctor => (
                                     <DoctorCardIC 
-                                        className="doctorcard" 
-                                        {...doctor} 
-                                        key={doctor.name} 
+                                        key={doctor.id}
+                                        {...doctor}
                                     />
                                 ))
                             ) : (
-                                <p>No doctors found.</p>
+                                <p>No doctors found matching your search.</p>
                             )}
-                        </center>
-                    )}
-                </div>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <h2>Find a doctor</h2>
+                        <h3>Search by speciality or doctor name</h3>
+                        <div className="doctors-grid">
+                            {doctors.map(doctor => (
+                                <DoctorCardIC
+                                    key={doctor.id}
+                                    {...doctor}
+                                />
+                            ))}
+                        </div>
+                    </>
+                )}
             </div>
-        </center>
+        </div>
     );
 };
 
