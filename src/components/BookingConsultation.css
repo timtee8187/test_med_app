@@ -1,0 +1,96 @@
+/* BookingConsultation.css - Direct component file styling */
+
+/* Main Container - matches your .searchpage-container style */
+.booking-consultation {
+    max-width: 1200px;
+    margin: auto;
+    margin-top: 10%;
+    color: #414146;
+    padding: 0 20px;
+    width: 100%;
+}
+
+/* Header - matches your h1 style */
+.booking-consultation h1 {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: #2d2d32;
+    margin-bottom: 30px;
+}
+
+/* Search Container - matches your search styles */
+.search-container {
+    display: flex;
+    justify-content: center;
+    margin: 30px 0;
+}
+
+/* Results Container - matches .search-results-container */
+.results-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.results-container h2 {
+    text-align: left;
+    font-size: 24px;
+    font-weight: 700;
+    color: #2d2d32;
+}
+
+.results-container h3 {
+    color: #787887;
+    text-align: left;
+    font-size: 15px;
+    margin: 10px 0 20px;
+}
+
+/* Doctor Cards - matches .doctorcard style */
+.doctor-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    padding: 18px;
+    border-radius: 4px;
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+}
+
+/* Empty State - matches your search prompt style */
+.search-prompt {
+    text-align: center;
+    padding: 40px 0;
+    color: #787887;
+}
+
+.search-prompt i {
+    color: #3f51b5;
+    margin-bottom: 15px;
+}
+
+/* Responsive Breakpoints - matches your media queries */
+@media (max-width: 768px) {
+    .booking-consultation {
+        margin-top: 15%;
+        padding: 0 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .booking-consultation {
+        margin-top: 20%;
+    }
+    
+    .booking-consultation h1 {
+        font-size: 24px;
+    }
+    
+    .results-container h2 {
+        font-size: 20px;
+    }
+}
