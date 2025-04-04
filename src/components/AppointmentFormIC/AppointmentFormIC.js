@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './AppointmentFormIC.css';
 
-const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit }) => {
+const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = () => {} }) => {
     const [formData, setFormData] = useState({
         name: '',
         phoneNumber: '',
@@ -10,6 +10,7 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit }) => {
     });
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const formRef = useRef();
 
     const timeSlots = [
         '9:00 AM - 10:00 AM',
@@ -19,6 +20,26 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit }) => {
         '3:00 PM - 4:00 PM',
         '4:00 PM - 5:00 PM'
     ];
+
+    // Handle clicks outside the form and manage body scroll
+    useEffect(() => {
+        // Lock body scroll when form mounts
+        document.body.classList.add('modal-open');
+        
+        const handleClickOutside = (event) => {
+            if (formRef.current && !formRef.current.contains(event.target)) {
+                onClose();
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        
+        // Cleanup function
+        return () => {
+            document.body.classList.remove('modal-open');
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [onClose]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -61,6 +82,7 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit }) => {
                 date: '',
                 timeSlot: ''
             });
+            onClose(); // Close form after successful submission
         } catch (error) {
             console.error('Submission error:', error);
         } finally {
@@ -69,79 +91,84 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="appointment-form">
-            <div className="doctor-info">
-                <h3>{doctorName}</h3>
-                <p>{doctorSpeciality}</p>
-                <p>Ratings: ☆☆☆☆</p>
-            </div>
+        <div className="form-popup-container">
+            <div className="form-popup-content" ref={formRef}>
+                <form onSubmit={handleSubmit} className="appointment-form">
+                    <div className="doctor-info">
+                        <h3>{doctorName}</h3>
+                        <p>{doctorSpeciality}</p>
+                        <p>Ratings: ☆☆☆☆</p>
+                    </div>
 
-            <div className="form-group">
-                <label htmlFor="name">Name:</label>
-                <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className={errors.name ? 'error' : ''}
-                />
-                {errors.name && <span className="error-message">{errors.name}</span>}
-            </div>
+                    <div className="form-group">
+                        <label htmlFor="name">Name:</label>
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            className={errors.name ? 'error' : ''}
+                        />
+                        {errors.name && <span className="error-message">{errors.name}</span>}
+                    </div>
 
-            <div className="form-group">
-                <label htmlFor="phoneNumber">Phone Number:</label>
-                <input
-                    type="tel"
-                    id="phoneNumber"
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
-                    onChange={handleChange}
-                    className={errors.phoneNumber ? 'error' : ''}
-                />
-                {errors.phoneNumber && <span className="error-message">{errors.phoneNumber}</span>}
-            </div>
+                    <div className="form-group">
+                        <label htmlFor="phoneNumber">Phone Number:</label>
+                        <input
+                            type="tel"
+                            id="phoneNumber"
+                            name="phoneNumber"
+                            value={formData.phoneNumber}
+                            onChange={handleChange}
+                            className={errors.phoneNumber ? 'error' : ''}
+                        />
+                        {errors.phoneNumber && <span className="error-message">{errors.phoneNumber}</span>}
+                    </div>
 
-            <div className="form-group">
-                <label htmlFor="date">Date of Appointment:</label>
-                <input
-                    type="date"
-                    id="date"
-                    name="date"
-                    value={formData.date}
-                    onChange={handleChange}
-                    min={new Date().toISOString().split('T')[0]}
-                    max={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
-                    className={errors.date ? 'error' : ''}
-                />
-                {errors.date && <span className="error-message">{errors.date}</span>}
-            </div>
+                    <div className="form-group">
+                        <label htmlFor="date">Date of Appointment:</label>
+                        <input
+                            type="date"
+                            id="date"
+                            name="date"
+                            value={formData.date}
+                            onChange={handleChange}
+                            min={new Date().toISOString().split('T')[0]}
+                            max={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                            className={errors.date ? 'error' : ''}
+                            placeholder="dd---yyyy"
+                        />
+                        {errors.date && <span className="error-message">{errors.date}</span>}
+                    </div>
 
-            <div className="form-group">
-                <label htmlFor="timeSlot">Book Time Slot:</label>
-                <select
-                    id="timeSlot"
-                    name="timeSlot"
-                    value={formData.timeSlot}
-                    onChange={handleChange}
-                    className={errors.timeSlot ? 'error' : ''}
-                >
-                    <option value="">Select a time slot ▼</option>
-                    {timeSlots.map((slot, index) => (
-                        <option key={index} value={slot}>{slot}</option>
-                    ))}
-                </select>
-                {errors.timeSlot && <span className="error-message">{errors.timeSlot}</span>}
-            </div>
+                    <div className="form-group">
+                        <label htmlFor="timeSlot">Book Time Slot:</label>
+                        <select
+                            id="timeSlot"
+                            name="timeSlot"
+                            value={formData.timeSlot}
+                            onChange={handleChange}
+                            className={errors.timeSlot ? 'error' : ''}
+                        >
+                            <option value="">Select a time slot ▼</option>
+                            {timeSlots.map((slot, index) => (
+                                <option key={index} value={slot}>{slot}</option>
+                            ))}
+                        </select>
+                        {errors.timeSlot && <span className="error-message">{errors.timeSlot}</span>}
+                    </div>
 
-            <button 
-                type="submit" 
-                className="submit-btn"
-                disabled={isSubmitting}
-            >
-                {isSubmitting ? 'Booking...' : 'Book Now'}
-            </button>
-        </form>
+                    <button 
+                        type="submit" 
+                        className="submit-btn"
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? 'Booking...' : 'Book Now'}
+                    </button>
+                </form>
+            </div>
+        </div>
     );
 };
 

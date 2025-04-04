@@ -10,7 +10,7 @@
     "popup": "^0.0.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.4.1",
+    "react-router-dom": "^7.5.0",
     "react-scripts": "^5.0.1",
     "reactjs": "^1.0.0",
     "reactjs-popup": "^2.0.6",
