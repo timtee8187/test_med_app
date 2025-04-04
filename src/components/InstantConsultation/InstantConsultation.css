@@ -34,3 +34,20 @@
     text-align: left;
     font-size: 15px;
 }
+/* Add this to your existing CSS */
+.search-results-container > h2 {
+    color: #2d2d32;
+    margin-bottom: 8px;
+}
+
+.search-results-container > h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.doctors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}

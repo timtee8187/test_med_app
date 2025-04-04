@@ -11,6 +11,7 @@ const InstantConsultation = () => {
     const [isSearched, setIsSearched] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [totalDoctors, setTotalDoctors] = useState(0);
     
     const getDoctorsDetails = useCallback(async () => {
         setIsLoading(true);
@@ -36,6 +37,7 @@ const InstantConsultation = () => {
             }));
             
             setDoctors(processedDoctors);
+            setTotalDoctors(processedDoctors.length); // Set total doctor count
             
             if (searchParams.get('speciality')) {
                 const filtered = processedDoctors.filter(doctor => 
@@ -114,7 +116,7 @@ const InstantConsultation = () => {
                     </>
                 ) : (
                     <>
-                        <h2>Find a doctor</h2>
+                        <h2>{totalDoctors} doctors available</h2> {/* Show total count */}
                         <h3>Search by speciality or doctor name</h3>
                         <div className="doctors-grid">
                             {doctors.map(doctor => (
