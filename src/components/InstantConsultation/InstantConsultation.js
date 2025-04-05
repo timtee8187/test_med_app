@@ -37,7 +37,7 @@ const InstantConsultation = () => {
             }));
             
             setDoctors(processedDoctors);
-            setTotalDoctors(processedDoctors.length); // Set total doctor count
+            setTotalDoctors(processedDoctors.length);
             
             if (searchParams.get('speciality')) {
                 const filtered = processedDoctors.filter(doctor => 
@@ -116,7 +116,7 @@ const InstantConsultation = () => {
                     </>
                 ) : (
                     <>
-                        <h2>{totalDoctors} doctors available</h2> {/* Show total count */}
+                        <h2>{totalDoctors} doctors available</h2>
                         <h3>Search by speciality or doctor name</h3>
                         <div className="doctors-grid">
                             {doctors.map(doctor => (

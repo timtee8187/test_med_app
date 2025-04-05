@@ -1,11 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Popup from 'reactjs-popup';
+import 'reactjs-popup/dist/index.css';
+import AppointmentFormIC from '../AppointmentFormIC/AppointmentFormIC'; // Adjust path as needed
 import "./Navbar.css";
 
 const Navbar = () => {
     const [click, setClick] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [username, setUsername] = useState("");
+    const [showAppointmentForm, setShowAppointmentForm] = useState(false);
     const navigate = useNavigate();
 
     const handleClick = () => setClick(!click);
@@ -33,8 +37,6 @@ const Navbar = () => {
         };
 
         checkAuthStatus();
-        
-        // Listen for storage changes (for logout from other tabs)
         window.addEventListener('storage', checkAuthStatus);
         return () => window.removeEventListener('storage', checkAuthStatus);
     }, []);
@@ -55,7 +57,17 @@ const Navbar = () => {
                     <Link to="/">Home</Link>
                 </li>
                 <li className="link">
-                    <Link to="/search/doctors">Appointments</Link>
+                    {/* Modified Appointments link (looks identical but opens popup) */}
+                    <a 
+                        href="#!" 
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setShowAppointmentForm(true);
+                        }}
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                    >
+                        Appointments
+                    </a>
                 </li>
                 <li className="link">
                     <Link to="/healthblog">Health Blog</Link>
@@ -90,6 +102,39 @@ const Navbar = () => {
                     </>
                 )}
             </ul>
+
+            {/* Hidden Appointment Form Popup */}
+            <Popup
+                open={showAppointmentForm}
+                onClose={() => setShowAppointmentForm(false)}
+                modal
+                nested
+                contentStyle={{
+                    width: 'auto',
+                    maxWidth: '500px',
+                    borderRadius: '5px',
+                    padding: '20px',
+                    backgroundColor: '#f8f9fa'
+                }}
+                overlayStyle={{
+                    background: 'rgba(0,0,0,0.5)'
+                }}
+                closeOnDocumentClick={false}
+            >
+                <div className="modal-content">
+                    <h3>Book a General Appointment</h3>
+                    <p>Fill out the form below</p>
+                    <AppointmentFormIC
+                        doctorName="General Practitioner"
+                        doctorSpeciality="General Medicine"
+                        onSubmit={(data) => {
+                            console.log("Appointment booked:", data);
+                            setShowAppointmentForm(false);
+                        }}
+                        onClose={() => setShowAppointmentForm(false)}
+                    />
+                </div>
+            </Popup>
         </nav>
     );
 };

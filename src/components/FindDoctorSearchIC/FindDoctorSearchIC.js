@@ -12,6 +12,17 @@ const initSpeciality = [
     'Ayurveda'
 ];
 
+// Updated doctor counts with balanced distribution
+const specialtyCounts = {
+    'Dentist': 3,
+    'Gynecologist/obstetrician': 2,
+    'General Physician': 4,
+    'Dermatologist': 2,
+    'Ear-nose-throat (ent) Specialist': 2,
+    'Homeopath': 2,
+    'Ayurveda': 2
+};
+
 const FindDoctorSearchIC = () => {
     const [doctorResultHidden, setDoctorResultHidden] = useState(true);
     const [searchDoctor, setSearchDoctor] = useState('');
@@ -70,7 +81,9 @@ const FindDoctorSearchIC = () => {
                                         />
                                     </span>
                                     <span>{speciality}</span>
-                                    <span>SPECIALITY</span>
+                                    <span className="speciality-count">
+                                        ({specialtyCounts[speciality] || 0} doctors available)
+                                    </span>
                                 </div>
                             ))}
                         </div>
