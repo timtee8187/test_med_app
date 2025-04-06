@@ -1,19 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './AppointmentFormIC.css';
+import { useNavigate } from 'react-router-dom';
 
-const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = () => {} }) => {
+const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = () => {}, isAuthenticated }) => {
     const [formData, setFormData] = useState({
         name: '',
         phoneNumber: '',
         date: '',
-        timeSlot: ''
+        timeSlot: '',
+        email: ''
     });
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showSummary, setShowSummary] = useState(false);
+    const [showSignupPrompt, setShowSignupPrompt] = useState(false);
     const [bookingData, setBookingData] = useState(null);
     const formRef = useRef();
     const [isMounted, setIsMounted] = useState(false);
+    const navigate = useNavigate();
 
     const timeSlots = [
         '9:00 AM - 10:00 AM',
@@ -60,7 +64,10 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
         if (!formData.name.trim()) newErrors.name = 'Name is required';
         if (!formData.phoneNumber.trim()) newErrors.phoneNumber = 'Phone number is required';
         else if (!/^\d{10,15}$/.test(formData.phoneNumber)) newErrors.phoneNumber = 'Enter valid phone number';
+        if (!formData.email) newErrors.email = 'Email is required';
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Enter valid email';
         if (!formData.date) newErrors.date = 'Date is required';
+        else if (new Date(formData.date) < new Date().setHours(0,0,0,0)) newErrors.date = 'Date cannot be in the past';
         if (!formData.timeSlot) newErrors.timeSlot = 'Time slot is required';
         
         setErrors(newErrors);
@@ -69,6 +76,13 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // Check authentication first
+        if (!isAuthenticated) {
+            setShowSignupPrompt(true);
+            return;
+        }
+        
         if (!validateForm()) return;
         
         setIsSubmitting(true);
@@ -81,18 +95,14 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
                 bookingId: 'BK-' + Math.random().toString(36).substr(2, 8).toUpperCase()
             };
             
-            // First set the booking data
             setBookingData(bookingDetails);
-            
-            // Then show the summary
             setShowSummary(true);
             
-            // Call onSubmit after showing summary
             await onSubmit(bookingDetails);
             
         } catch (error) {
             console.error('Submission error:', error);
-            setShowSummary(false); // Hide summary if error occurs
+            setShowSummary(false);
         } finally {
             setIsSubmitting(false);
         }
@@ -101,12 +111,28 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
     const closeSummary = () => {
         setShowSummary(false);
         onClose();
+        resetForm();
+    };
+
+    const resetForm = () => {
         setFormData({
             name: '',
             phoneNumber: '',
             date: '',
-            timeSlot: ''
+            timeSlot: '',
+            email: ''
         });
+        setErrors({});
+    };
+
+    const handleSignupRedirect = () => {
+        onClose();
+        navigate('/signup');
+    };
+
+    const handleLoginRedirect = () => {
+        onClose();
+        navigate('/login');
     };
 
     if (!isMounted) return null;
@@ -115,7 +141,23 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
         <div className="form-popup-container">
             <div className="form-popup-overlay"></div>
             <div className="form-popup-content" ref={formRef} style={{ minWidth: '500px' }}>
-                {!showSummary ? (
+                {showSignupPrompt ? (
+                    <div className="auth-prompt">
+                        <h3>Sign Up Required</h3>
+                        <p>You need to have an account to book appointments. Please sign up or log in to continue.</p>
+                        <div className="auth-buttons">
+                            <button className="signup-btn" onClick={handleSignupRedirect}>
+                                Sign Up
+                            </button>
+                            <button className="login-btn" onClick={handleLoginRedirect}>
+                                Log In
+                            </button>
+                            <button className="cancel-btn" onClick={() => setShowSignupPrompt(false)}>
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                ) : !showSummary ? (
                     <form onSubmit={handleSubmit} className="appointment-form">
                         <div className="doctor-info">
                             <h3>{doctorName}</h3>
@@ -124,7 +166,7 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="name">Name:</label>
+                            <label htmlFor="name">Full Name:</label>
                             <input
                                 type="text"
                                 id="name"
@@ -132,8 +174,23 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
                                 value={formData.name}
                                 onChange={handleChange}
                                 className={errors.name ? 'error' : ''}
+                                placeholder="Enter your full name"
                             />
                             {errors.name && <span className="error-message">{errors.name}</span>}
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="email">Email:</label>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                className={errors.email ? 'error' : ''}
+                                placeholder="Enter your email"
+                            />
+                            {errors.email && <span className="error-message">{errors.email}</span>}
                         </div>
 
                         <div className="form-group">
@@ -145,6 +202,7 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
                                 value={formData.phoneNumber}
                                 onChange={handleChange}
                                 className={errors.phoneNumber ? 'error' : ''}
+                                placeholder="Enter 10-15 digit phone number"
                             />
                             {errors.phoneNumber && <span className="error-message">{errors.phoneNumber}</span>}
                         </div>
@@ -160,7 +218,7 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
                                 min={new Date().toISOString().split('T')[0]}
                                 max={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
                                 className={errors.date ? 'error' : ''}
-                                placeholder="dd---yyyy"
+                                placeholder="Select a date"
                             />
                             {errors.date && <span className="error-message">{errors.date}</span>}
                         </div>
@@ -215,8 +273,21 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
                                 <span className="detail-value">{bookingData?.name}</span>
                             </div>
                             <div className="detail-row">
+                                <span className="detail-label">Email:</span>
+                                <span className="detail-value">{bookingData?.email}</span>
+                            </div>
+                            <div className="detail-row">
+                                <span className="detail-label">Phone:</span>
+                                <span className="detail-value">{bookingData?.phoneNumber}</span>
+                            </div>
+                            <div className="detail-row">
                                 <span className="detail-label">Date:</span>
-                                <span className="detail-value">{bookingData?.date}</span>
+                                <span className="detail-value">{new Date(bookingData?.date).toLocaleDateString('en-US', { 
+                                    weekday: 'long', 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric' 
+                                })}</span>
                             </div>
                             <div className="detail-row">
                                 <span className="detail-label">Time:</span>

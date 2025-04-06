@@ -233,13 +233,82 @@ input[type="date"] {
     background: #0069d9;
 }
 
+/* Authentication Prompt Styles */
+.auth-prompt {
+    width: 100%;
+    padding: 30px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.auth-prompt h3 {
+    color: #333;
+    margin: 0 0 15px 0;
+    font-size: 1.5rem;
+}
+
+.auth-prompt p {
+    color: #6c757d;
+    margin: 0 0 25px 0;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.auth-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.signup-btn, .login-btn, .cancel-btn {
+    width: 100%;
+    padding: 0.85rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.signup-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.signup-btn:hover {
+    background-color: #218838;
+}
+
+.login-btn {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.login-btn:hover {
+    background-color: #138496;
+}
+
+.cancel-btn {
+    background-color: #f8f9fa;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.cancel-btn:hover {
+    background-color: #e9ecef;
+}
+
 /* Animation for summary appearance */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-.booking-summary {
+.booking-summary, .auth-prompt {
     animation: fadeIn 0.3s ease-out forwards;
 }
 
@@ -250,11 +319,11 @@ input[type="date"] {
         min-width: unset;
     }
     
-    .appointment-form {
+    .appointment-form, .auth-prompt {
         padding: 25px;
     }
     
-    .doctor-info h3 {
+    .doctor-info h3, .auth-prompt h3 {
         font-size: 1.4rem;
     }
     
@@ -266,7 +335,7 @@ input[type="date"] {
         width: 100px;
     }
     
-    .summary-actions {
+    .summary-actions, .auth-buttons {
         flex-direction: column;
         gap: 10px;
     }
