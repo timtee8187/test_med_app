@@ -179,7 +179,7 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
                             {errors.name && <span className="error-message">{errors.name}</span>}
                         </div>
 
-                        <div className="form-group">
+                        {/* <div className="form-group">
                             <label htmlFor="email">Email:</label>
                             <input
                                 type="email"
@@ -191,7 +191,7 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
                                 placeholder="Enter your email"
                             />
                             {errors.email && <span className="error-message">{errors.email}</span>}
-                        </div>
+                        </div> */}
 
                         <div className="form-group">
                             <label htmlFor="phoneNumber">Phone Number:</label>
@@ -202,7 +202,7 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
                                 value={formData.phoneNumber}
                                 onChange={handleChange}
                                 className={errors.phoneNumber ? 'error' : ''}
-                                placeholder="Enter 10-15 digit phone number"
+                                placeholder="Enter 10 digit phone number"
                             />
                             {errors.phoneNumber && <span className="error-message">{errors.phoneNumber}</span>}
                         </div>
@@ -246,7 +246,15 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? 'Booking...' : 'Book Now'}
-                        </button>
+                            </button>
+
+                            <button 
+            type="button" 
+            className="cancel-btn"
+            onClick={onClose}
+        >
+            Cancel
+        </button>
                     </form>
                 ) : (
                     <div className="booking-summary">
