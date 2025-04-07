@@ -13,10 +13,12 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showSummary, setShowSummary] = useState(false);
-    const [showSignupPrompt, setShowSignupPrompt] = useState(false);
     const [bookingData, setBookingData] = useState(null);
     const formRef = useRef();
     const [isMounted, setIsMounted] = useState(false);
+    
+    // Keep navigate for potential future use but mark as intentionally unused
+    // eslint-disable-next-line no-unused-vars
     const navigate = useNavigate();
 
     const timeSlots = [
@@ -77,12 +79,6 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Check authentication first
-        if (!isAuthenticated) {
-            setShowSignupPrompt(true);
-            return;
-        }
-        
         if (!validateForm()) return;
         
         setIsSubmitting(true);
@@ -125,44 +121,18 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
         setErrors({});
     };
 
-    const handleSignupRedirect = () => {
-        onClose();
-        navigate('/signup');
-    };
-
-    const handleLoginRedirect = () => {
-        onClose();
-        navigate('/login');
-    };
-
     if (!isMounted) return null;
 
     return (
         <div className="form-popup-container">
             <div className="form-popup-overlay"></div>
-            <div className="form-popup-content" ref={formRef} style={{ minWidth: '500px' }}>
-                {showSignupPrompt ? (
-                    <div className="auth-prompt">
-                        <h3>Sign Up Required</h3>
-                        <p>You need to have an account to book appointments. Please sign up or log in to continue.</p>
-                        <div className="auth-buttons">
-                            <button className="signup-btn" onClick={handleSignupRedirect}>
-                                Sign Up
-                            </button>
-                            <button className="login-btn" onClick={handleLoginRedirect}>
-                                Log In
-                            </button>
-                            <button className="cancel-btn" onClick={() => setShowSignupPrompt(false)}>
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                ) : !showSummary ? (
+            <div className="form-popup-content" ref={formRef}>
+                {!showSummary ? (
                     <form onSubmit={handleSubmit} className="appointment-form">
                         <div className="doctor-info">
                             <h3>{doctorName}</h3>
                             <p>{doctorSpeciality}</p>
-                            <p>Ratings: ☆☆☆☆</p>
+                            <div className="ratings">Ratings: ☆☆☆☆</div>
                         </div>
 
                         <div className="form-group">
@@ -178,20 +148,6 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
                             />
                             {errors.name && <span className="error-message">{errors.name}</span>}
                         </div>
-
-                        {/* <div className="form-group">
-                            <label htmlFor="email">Email:</label>
-                            <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                className={errors.email ? 'error' : ''}
-                                placeholder="Enter your email"
-                            />
-                            {errors.email && <span className="error-message">{errors.email}</span>}
-                        </div> */}
 
                         <div className="form-group">
                             <label htmlFor="phoneNumber">Phone Number:</label>
@@ -218,13 +174,12 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
                                 min={new Date().toISOString().split('T')[0]}
                                 max={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
                                 className={errors.date ? 'error' : ''}
-                                placeholder="Select a date"
                             />
                             {errors.date && <span className="error-message">{errors.date}</span>}
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="timeSlot">Book Time Slot:</label>
+                            <label htmlFor="timeSlot">Time Slot:</label>
                             <select
                                 id="timeSlot"
                                 name="timeSlot"
@@ -232,7 +187,7 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
                                 onChange={handleChange}
                                 className={errors.timeSlot ? 'error' : ''}
                             >
-                                <option value="">Select a time slot ▼</option>
+                                <option value="">Select a time slot</option>
                                 {timeSlots.map((slot, index) => (
                                     <option key={index} value={slot}>{slot}</option>
                                 ))}
@@ -240,21 +195,26 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
                             {errors.timeSlot && <span className="error-message">{errors.timeSlot}</span>}
                         </div>
 
-                        <button 
-                            type="submit" 
-                            className="submit-btn"
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? 'Booking...' : 'Book Now'}
-                            </button>
-
+                        <div className="form-actions">
                             <button 
-            type="button" 
-            className="cancel-btn"
-            onClick={onClose}
-        >
-            Cancel
-        </button>
+                                type="submit" 
+                                className="submit-btn"
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <span className="spinner"></span> Booking...
+                                    </>
+                                ) : 'Book Now'}
+                            </button>
+                            <button 
+                                type="button" 
+                                className="cancel-btn"
+                                onClick={onClose}
+                            >
+                                Cancel
+                            </button>
+                        </div>
                     </form>
                 ) : (
                     <div className="booking-summary">
@@ -281,21 +241,19 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
                                 <span className="detail-value">{bookingData?.name}</span>
                             </div>
                             <div className="detail-row">
-                                <span className="detail-label">Email:</span>
-                                <span className="detail-value">{bookingData?.email}</span>
-                            </div>
-                            <div className="detail-row">
                                 <span className="detail-label">Phone:</span>
                                 <span className="detail-value">{bookingData?.phoneNumber}</span>
                             </div>
                             <div className="detail-row">
                                 <span className="detail-label">Date:</span>
-                                <span className="detail-value">{new Date(bookingData?.date).toLocaleDateString('en-US', { 
-                                    weekday: 'long', 
-                                    year: 'numeric', 
-                                    month: 'long', 
-                                    day: 'numeric' 
-                                })}</span>
+                                <span className="detail-value">
+                                    {new Date(bookingData?.date).toLocaleDateString('en-US', { 
+                                        weekday: 'long', 
+                                        year: 'numeric', 
+                                        month: 'long', 
+                                        day: 'numeric' 
+                                    })}
+                                </span>
                             </div>
                             <div className="detail-row">
                                 <span className="detail-label">Time:</span>

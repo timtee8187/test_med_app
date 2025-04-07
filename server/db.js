@@ -1,38 +1,46 @@
 const mongoose = require('mongoose');
 
-// Encode the password in case it contains special characters
-const password = encodeURIComponent("oeDfvOpXfCVr8KjNTXd1vLGS");
-const mongoURI = `mongodb://root:${password}@172.21.228.79:27017/stayhealthybeta1?authSource=admin`;
-
-const connectToMongo = async (retryCount) => {
+const connectToMongo = async (retryCount = 0) => {
     const MAX_RETRIES = 3;
-    const count = retryCount ?? 0;
+    const RETRY_DELAY = 2000;
     
     try {
         mongoose.set('strictQuery', false);
         
-        console.log('Attempting to connect to MongoDB with URI:', mongoURI.replace(/:[^@]+@/, ':*****@'));
+        // Use environment variable or fallback to local connection
+        const mongoURI = process.env.MONGO_URI || 
+            'mongodb://root:tizSHjtwDC8BTp60wYviTiol@172.21.254.13:27017/stayhealthybeta1?authSource=admin';
         
+        console.log('Attempting MongoDB connection to:', 
+            mongoURI.replace(/:[^@]+@/, ':*****@'));
+
         await mongoose.connect(mongoURI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            authSource: 'admin' // Important for authentication
+            connectTimeoutMS: 5000, // 5 seconds timeout
+            socketTimeoutMS: 45000, // 45 seconds socket timeout
+            authSource: 'admin'
         });
-        
-        console.info('Connected to Mongo Successfully');
-        return;
+
+        console.log('✅ MongoDB connection established');
+        return true;
     } catch (error) {
-        console.error('MongoDB connection error:', error.message);
-
-        const nextRetryCount = count + 1;
-        if (nextRetryCount >= MAX_RETRIES) {
-            throw new Error(`Unable to connect to Mongo after ${MAX_RETRIES} attempts: ${error.message}`);
+        console.error('❌ MongoDB connection failed:', error.message);
+        
+        if (retryCount < MAX_RETRIES - 1) {
+            console.log(`Retrying in ${RETRY_DELAY/1000} seconds... (Attempt ${retryCount + 2}/${MAX_RETRIES})`);
+            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+            return connectToMongo(retryCount + 1);
         }
-
-        console.info(`Retrying, retry count: ${nextRetryCount}`);
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Add delay between retries
-        return await connectToMongo(nextRetryCount);
+        
+        throw new Error(`Failed to connect after ${MAX_RETRIES} attempts: ${error.message}`);
     }
 };
+
+// Connection events for better debugging
+mongoose.connection.on('connecting', () => console.log('Connecting to MongoDB...'));
+mongoose.connection.on('connected', () => console.log('MongoDB connected'));
+mongoose.connection.on('disconnected', () => console.log('MongoDB disconnected'));
+mongoose.connection.on('error', (err) => console.error('MongoDB connection error:', err));
 
 module.exports = connectToMongo;
