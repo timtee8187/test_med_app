@@ -1,12 +1,19 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import Navbar from "../Navbar/Navbar"; // Import Navbar
+import { useNavigate } from "react-router-dom"; // Add this import
+import Navbar from "../Navbar/Navbar";
 import "./LandingPage.css";
 
 const LandingPage = () => {
+  const navigate = useNavigate(); // Add this hook
+
+  const handleGetStarted = () => {
+    // Navigate to login page (you can change to '/signup' if preferred)
+    navigate('/login');
+  };
+
   return (
     <div className="landing-container">
-      <Navbar /> {/* Navbar added here - will appear at top */}
+      <Navbar />
       
       <section className="hero-section">
         <div>
@@ -26,9 +33,10 @@ const LandingPage = () => {
               Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eaque at
               quae ducimus. Suscipit omnis quibusdam non cum rem voluptatem!
             </h4>
-            <Link to="/services">
-              <button className="button">Get Started</button>
-            </Link>
+            {/* Updated button with onClick handler */}
+            <button className="button" onClick={handleGetStarted}>
+              Get Started
+            </button>
           </div>
         </div>
       </section>

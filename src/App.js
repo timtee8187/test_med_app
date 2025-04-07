@@ -1,16 +1,14 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
-import LandingPage from './components/LandingPage/Landing_Page';
+import LandingPage from './components/LandingPage/Landing_Page'; // Corrected path
 import Login from './components/Login/Login';
 import SignUp from './components/SignUp/Sign_Up';
 import InstantConsultation from './components/InstantConsultation/InstantConsultation';
 import BookingConsultation from './components/BookingConsultation';
-// Import the additional components
 import DoctorCardIC from './components/DoctorCardIC/DoctorCardIC';
 import FindDoctorSearchIC from './components/FindDoctorSearchIC/FindDoctorSearchIC';
 import AppointmentFormIC from './components/AppointmentFormIC/AppointmentFormIC';
-
 import './App.css';
 
 function App() {
