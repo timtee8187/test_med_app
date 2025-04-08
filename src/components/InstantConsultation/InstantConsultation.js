@@ -4,6 +4,8 @@ import { useSearchParams } from 'react-router-dom';
 import FindDoctorSearchIC from '../FindDoctorSearchIC/FindDoctorSearchIC';
 import DoctorCardIC from '../DoctorCardIC/DoctorCardIC';
 
+const normalize = (str) => str.toLowerCase().replace(/\s+/g, '').replace(/[^\w]/g, '');
+
 const InstantConsultation = () => {
     const [searchParams] = useSearchParams();
     const [doctors, setDoctors] = useState([]);
@@ -12,20 +14,20 @@ const InstantConsultation = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [totalDoctors, setTotalDoctors] = useState(0);
-    
+
     const getDoctorsDetails = useCallback(async () => {
         setIsLoading(true);
         setError(null);
-        
+
         try {
             const response = await fetch('https://api.npoint.io/9a5543d36f1460da2f63');
-            
+
             if (!response.ok) throw new Error('Failed to fetch doctors');
-            
+
             const data = await response.json();
-            
+
             if (!Array.isArray(data)) throw new Error('Invalid data format');
-            
+
             const processedDoctors = data.map(doctor => ({
                 id: doctor.id || Math.random().toString(36).slice(2),
                 name: doctor.name || 'Dr. Unknown',
@@ -35,17 +37,20 @@ const InstantConsultation = () => {
                 profilePic: doctor.profilePic || '',
                 consultationFees: doctor.consultationFees || 'Not specified'
             }));
-            
+
             setDoctors(processedDoctors);
             setTotalDoctors(processedDoctors.length);
-            
-            if (searchParams.get('speciality')) {
-                const filtered = processedDoctors.filter(doctor => 
-                    doctor.speciality.toLowerCase().includes(searchParams.get('speciality').toLowerCase())
+
+            // Handle initial filtering from URL
+            const specialityParam = searchParams.get('speciality');
+            if (specialityParam) {
+                const filtered = processedDoctors.filter(doctor =>
+                    normalize(doctor.speciality).includes(normalize(specialityParam))
                 );
                 setFilteredDoctors(filtered);
                 setIsSearched(true);
             }
+
         } catch (err) {
             console.error('Error:', err);
             setError(err.message);
@@ -54,48 +59,51 @@ const InstantConsultation = () => {
         }
     }, [searchParams]);
 
+    useEffect(() => {
+        getDoctorsDetails();
+    }, [getDoctorsDetails]);
+
+    useEffect(() => {
+        // Refetch filtered results if speciality changes in the URL
+        const specialityParam = searchParams.get('speciality');
+        if (specialityParam && doctors.length > 0) {
+            const filtered = doctors.filter(doctor =>
+                normalize(doctor.speciality).includes(normalize(specialityParam))
+            );
+            setFilteredDoctors(filtered);
+            setIsSearched(true);
+        }
+    }, [searchParams, doctors]);
+
     const handleSearch = (searchText) => {
-        const searchTerm = searchText.toLowerCase().trim();
-        
+        const searchTerm = normalize(searchText);
         if (!searchTerm) {
             setFilteredDoctors([]);
             setIsSearched(false);
             return;
         }
-        
+
         const results = doctors.filter(doctor =>
-            doctor.speciality.toLowerCase().includes(searchTerm) ||
-            doctor.name.toLowerCase().includes(searchTerm)
+            normalize(doctor.speciality).includes(searchTerm) ||
+            normalize(doctor.name).includes(searchTerm)
         );
-        
+
         setFilteredDoctors(results);
         setIsSearched(true);
     };
 
-    useEffect(() => {
-        getDoctorsDetails();
-    }, [getDoctorsDetails]);
-
     if (isLoading) {
-        return (
-            <div className="searchpage-container">
-                <p>Loading doctors...</p>
-            </div>
-        );
+        return <div className="searchpage-container"><p>Loading doctors...</p></div>;
     }
 
     if (error) {
-        return (
-            <div className="searchpage-container">
-                <p className="error-message">{error}</p>
-            </div>
-        );
+        return <div className="searchpage-container"><p className="error-message">{error}</p></div>;
     }
 
     return (
         <div className="searchpage-container">
             <FindDoctorSearchIC onSearch={handleSearch} />
-            
+
             <div className="search-results-container">
                 {isSearched ? (
                     <>
@@ -104,10 +112,7 @@ const InstantConsultation = () => {
                         <div className="doctors-grid">
                             {filteredDoctors.length > 0 ? (
                                 filteredDoctors.map(doctor => (
-                                    <DoctorCardIC 
-                                        key={doctor.id}
-                                        {...doctor}
-                                    />
+                                    <DoctorCardIC key={doctor.id} {...doctor} />
                                 ))
                             ) : (
                                 <p>No doctors found matching your search.</p>
@@ -120,10 +125,7 @@ const InstantConsultation = () => {
                         <h3>Search by speciality or doctor name</h3>
                         <div className="doctors-grid">
                             {doctors.map(doctor => (
-                                <DoctorCardIC
-                                    key={doctor.id}
-                                    {...doctor}
-                                />
+                                <DoctorCardIC key={doctor.id} {...doctor} />
                             ))}
                         </div>
                     </>

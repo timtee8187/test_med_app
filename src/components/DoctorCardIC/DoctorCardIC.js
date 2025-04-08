@@ -11,11 +11,12 @@ const DoctorCardIC = ({
     ratings, 
     profilePic,
     consultationFees,
-    isAuthenticated
+    isAuthenticated = false,
+    searchTerm = ''
 }) => {
     const [isBooked, setIsBooked] = useState(false);
     const [bookingData, setBookingData] = useState(null);
-    const [showAuthPopup, setShowAuthPopup] = useState(false); // New state for auth popup
+    const [showAuthPopup, setShowAuthPopup] = useState(false);
 
     const handleBooking = (formData) => {
         console.log('Booking confirmed:', { 
@@ -37,30 +38,28 @@ const DoctorCardIC = ({
         setBookingData(null);
     };
 
-    // New function to handle book button click
     const handleBookClick = (e) => {
         if (!isAuthenticated) {
             e.preventDefault();
             setShowAuthPopup(true);
-            return false; // Prevent default popup behavior
+            return false;
         }
-        return true; // Allow default popup behavior
+        return true;
     };
 
-    // New auth handlers
-    const handleSignupRedirect = () => {
-        setShowAuthPopup(false);
-        window.location.href = '/signup';
-    };
-
-    const handleLoginRedirect = () => {
-        setShowAuthPopup(false);
-        window.location.href = '/login';
+    const highlightMatch = (text, term) => {
+        if (!term) return text;
+        
+        const regex = new RegExp(`(${term})`, 'gi');
+        return text.split(regex).map((part, i) => 
+            part.toLowerCase() === term.toLowerCase() ? 
+            <span key={i} className="highlight">{part}</span> : 
+            part
+        );
     };
 
     return (
         <div className="doctor-card-container">
-            {/* New Authentication Popup */}
             <Popup
                 open={showAuthPopup}
                 onClose={() => setShowAuthPopup(false)}
@@ -78,10 +77,10 @@ const DoctorCardIC = ({
                     <h3>Sign Up Required</h3>
                     <p>You need to have an account to book appointments. Please sign up or log in to continue.</p>
                     <div className="auth-buttons">
-                        <button className="signup-btn" onClick={handleSignupRedirect}>
+                        <button className="signup-btn" onClick={() => window.location.href = '/signup'}>
                             Sign Up
                         </button>
-                        <button className="login-btn" onClick={handleLoginRedirect}>
+                        <button className="login-btn" onClick={() => window.location.href = '/login'}>
                             Log In
                         </button>
                         <button 
@@ -94,7 +93,6 @@ const DoctorCardIC = ({
                 </div>
             </Popup>
 
-            {/* Original Doctor Card Content - completely unchanged */}
             <div className="doctor-card-details-container">
                 <div className="doctor-card-profile-image-container">
                     {profilePic ? (
@@ -114,8 +112,12 @@ const DoctorCardIC = ({
                 </div>
                 
                 <div className="doctor-card-details">
-                    <div className="doctor-card-detail-name">{name}</div>
-                    <div className="doctor-card-detail-speciality">{speciality}</div>
+                    <div className="doctor-card-detail-name">
+                        {highlightMatch(name, searchTerm)}
+                    </div>
+                    <div className="doctor-card-detail-speciality">
+                        {highlightMatch(speciality, searchTerm)}
+                    </div>
                     <div className="doctor-card-detail-experience">
                         {experience} {experience === 1 ? 'year' : 'years'} experience
                     </div>
@@ -129,7 +131,6 @@ const DoctorCardIC = ({
                 </div>
             </div>
             
-            {/* Original Booking Actions - with added onClick handler */}
             <div className="booking-actions">
                 {isBooked ? (
                     <button 
@@ -165,9 +166,8 @@ const DoctorCardIC = ({
                             background: 'rgba(0,0,0,0.5)'
                         }}
                         closeOnDocumentClick={false}
-                        onOpen={handleBookClick} // Added to handle click
                     >
-                        {close => isAuthenticated ? (
+                        {close => (
                             <div className="modal-content">
                                 <h3>Book Appointment with {name}</h3>
                                 <p>{speciality}</p>
@@ -181,7 +181,7 @@ const DoctorCardIC = ({
                                     onCancel={close}
                                 />
                             </div>
-                        ) : null}
+                        )}
                     </Popup>
                 )}
             </div>
