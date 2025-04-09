@@ -16,9 +16,6 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
     const [bookingData, setBookingData] = useState(null);
     const formRef = useRef();
     const [isMounted, setIsMounted] = useState(false);
-    
-    // Keep navigate for potential future use but mark as intentionally unused
-    // eslint-disable-next-line no-unused-vars
     const navigate = useNavigate();
 
     const timeSlots = [
@@ -95,6 +92,9 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
             setShowSummary(true);
             
             await onSubmit(bookingDetails);
+            
+            // After successful booking, navigate back to doctor cards
+            navigate('/InstantConsultation');
             
         } catch (error) {
             console.error('Submission error:', error);
@@ -209,8 +209,8 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onClose = (
                             </button>
                             <button 
                                 type="button" 
-                                className="cancel-btn"
-                                onClick={onClose}
+                                className="cancel-form-btn"
+                                onClick={() => navigate('/InstantConsultation')}
                             >
                                 Cancel
                             </button>
