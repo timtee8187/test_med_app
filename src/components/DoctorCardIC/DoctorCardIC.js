@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'; // Added useState import here
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import './DoctorCardIC.css';
@@ -10,7 +10,8 @@ const DoctorCardIC = ({
     experience, 
     ratings, 
     profilePic,
-    consultationFees 
+    consultationFees,
+    onReviewClick
 }) => {
     const [isBooked, setIsBooked] = useState(false);
     const numericRating = typeof ratings === 'string' ? parseFloat(ratings) : ratings;
@@ -96,51 +97,60 @@ const DoctorCardIC = ({
                         <div className="fee-disclaimer">No cancellation fee</div>
                     </button>
                 ) : (
-                    <Popup
-                        trigger={
-                            <button className="book-appointment-btn" style={{ backgroundColor: '#1976d2' }}>
-                                Book Appointment
-                                <div className="fee-disclaimer">No booking fee</div>
-                            </button>
-                        }
-                        modal
-                        nested
-                        contentStyle={{
-                            width: 'auto',
-                            maxWidth: '500px',
-                            borderRadius: '8px',
-                            padding: '25px',
-                            boxShadow: '0 5px 15px rgba(0,0,0,0.3)'
-                        }}
-                        overlayStyle={{
-                            background: 'rgba(0,0,0,0.5)'
-                        }}
-                    >
-                        {close => (
-                            <div className="booking-modal-content">
-                                <button className="modal-close-btn" onClick={close}>×</button>
-                                <h3 className="modal-title">Book Appointment with Dr. {name}</h3>
-                                <p className="modal-speciality">{speciality}</p>
-                                <div className="modal-doctor-info">
-                                    {profilePic && <img src={profilePic} alt={name} className="modal-doctor-img" />}
-                                    <div>
-                                        <p>{experience} years experience</p>
-                                        <p>Rating: {safeRating.toFixed(1)}</p>
-                                        <p>Fee: {consultationFees}</p>
+                    <>
+                        <Popup
+                            trigger={
+                                <button className="book-appointment-btn" style={{ backgroundColor: '#1976d2' }}>
+                                    Book Appointment
+                                    <div className="fee-disclaimer">No booking fee</div>
+                                </button>
+                            }
+                            modal
+                            nested
+                            contentStyle={{
+                                width: 'auto',
+                                maxWidth: '500px',
+                                borderRadius: '8px',
+                                padding: '25px',
+                                boxShadow: '0 5px 15px rgba(0,0,0,0.3)'
+                            }}
+                            overlayStyle={{
+                                background: 'rgba(0,0,0,0.5)'
+                            }}
+                        >
+                            {close => (
+                                <div className="booking-modal-content">
+                                    <button className="modal-close-btn" onClick={close}>×</button>
+                                    <h3 className="modal-title">Book Appointment with Dr. {name}</h3>
+                                    <p className="modal-speciality">{speciality}</p>
+                                    <div className="modal-doctor-info">
+                                        {profilePic && <img src={profilePic} alt={name} className="modal-doctor-img" />}
+                                        <div>
+                                            <p>{experience} years experience</p>
+                                            <p>Rating: {safeRating.toFixed(1)}</p>
+                                            <p>Fee: {consultationFees}</p>
+                                        </div>
                                     </div>
+                                    <AppointmentFormIC
+                                        doctorName={name}
+                                        doctorSpeciality={speciality}
+                                        onSubmit={(data) => {
+                                            handleBooking(data);
+                                            close();
+                                        }}
+                                        onCancel={close}
+                                    />
                                 </div>
-                                <AppointmentFormIC
-                                    doctorName={name}
-                                    doctorSpeciality={speciality}
-                                    onSubmit={(data) => {
-                                        handleBooking(data);
-                                        close();
-                                    }}
-                                    onCancel={close}
-                                />
-                            </div>
-                        )}
-                    </Popup>
+                            )}
+                        </Popup>
+                        <button 
+                            className="leave-review-btn"
+                            onClick={onReviewClick}
+                            style={{ marginTop: '10px' }}
+                        >
+                            Leave Review
+                        </button>
+                    </>
                 )}
             </div>
         </div>
