@@ -8,9 +8,8 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onCancel })
         date: '',
         timeSlot: ''
     });
-    const [errors, setErrors] = useState({});
-
-    // Available time slots
+    
+    // Available time slots - now actually used in the JSX
     const timeSlots = [
         '9:00 AM - 10:00 AM',
         '10:00 AM - 11:00 AM',
@@ -20,12 +19,18 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onCancel })
         '4:00 PM - 5:00 PM'
     ];
 
+    const [errors, setErrors] = useState({});
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: value
         }));
+        // Clear error when user types
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: '' }));
+        }
     };
 
     const validateForm = () => {
@@ -41,12 +46,26 @@ const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onCancel })
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validateForm()) {
+            // Save to storage
+            localStorage.setItem('doctorData', JSON.stringify({
+                name: doctorName,
+                speciality: doctorSpeciality
+            }));
+            
+            localStorage.setItem(doctorName, JSON.stringify({
+                date: formData.date,
+                time: formData.timeSlot,
+                patient: formData.name
+            }));
+            
+            sessionStorage.setItem('email', formData.name);
+            
             onSubmit({
                 ...formData,
                 doctorName,
                 doctorSpeciality
             });
-            // Reset form
+            
             setFormData({
                 name: '',
                 phoneNumber: '',

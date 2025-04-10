@@ -354,3 +354,23 @@
         margin: 0;
     }
 }
+.book-appointment-btn {
+    background-color: #1976d2; /* Blue color */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.book-appointment-btn:hover {
+    background-color: #80bdff; /* Slightly darker blue on hover */
+}
+
+.fee-disclaimer {
+    font-size: 0.8em;
+    font-weight: normal;
+    margin-top: 5px;
+}

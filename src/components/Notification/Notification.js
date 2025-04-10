@@ -1,126 +1,77 @@
 import React, { useEffect, useState } from 'react';
 import './Notification.css';
-import Navbar from '../Navbar/Navbar';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faCalendarCheck, faCalendarTimes } from '@fortawesome/free-solid-svg-icons';
 
 const Notification = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState("");
-  const [doctorData, setDoctorData] = useState(null);
-  const [appointmentData, setAppointmentData] = useState(null);
-  const [showNotification, setShowNotification] = useState(true);
-  const [notificationType, setNotificationType] = useState('booking'); // 'booking' or 'cancellation'
+    const [username, setUsername] = useState("");
+    const [doctorData, setDoctorData] = useState(null);
+    const [appointmentData, setAppointmentData] = useState(null);
+    const [showNotification, setShowNotification] = useState(false);
 
-  useEffect(() => {
-    const storedUsername = sessionStorage.getItem('email');
-    const storedDoctorData = JSON.parse(localStorage.getItem('doctorData'));
-    const storedAppointmentData = JSON.parse(localStorage.getItem(storedDoctorData?.name));
+    useEffect(() => {
+        const checkAppointment = () => {
+            const storedUsername = sessionStorage.getItem('email') || sessionStorage.getItem('patientEmail');
+            const storedDoctorData = JSON.parse(localStorage.getItem('doctorData'));
+            const doctorName = storedDoctorData?.name;
+            const storedAppointment = JSON.parse(localStorage.getItem(doctorName));
 
-    if (storedUsername) {
-      setIsLoggedIn(true);
-      setUsername(storedUsername);
-    }
+            if (storedUsername && storedDoctorData && storedAppointment) {
+                setUsername(storedUsername);
+                setDoctorData(storedDoctorData);
+                setAppointmentData(storedAppointment);
+                setShowNotification(true);
+            } else {
+                setShowNotification(false);
+            }
+        };
 
-    if (storedDoctorData) {
-      setDoctorData(storedDoctorData);
-    }
+        // Initial check
+        checkAppointment();
 
-    if (storedAppointmentData) {
-      setAppointmentData(storedAppointmentData);
-      // Check if this is a cancellation
-      if (storedAppointmentData.status === 'cancelled') {
-        setNotificationType('cancellation');
-      }
-    }
-  }, []);
+        // Listen for storage changes
+        const handleStorageChange = () => checkAppointment();
+        window.addEventListener('storage', handleStorageChange);
 
-  const handleCancelAppointment = () => {
-    if (doctorData && appointmentData) {
-      // Update appointment status to cancelled
-      const updatedAppointment = {
-        ...appointmentData,
-        status: 'cancelled',
-        cancellationTime: new Date().toISOString()
-      };
-      
-      // Save back to localStorage
-      localStorage.setItem(doctorData.name, JSON.stringify(updatedAppointment));
-      setAppointmentData(updatedAppointment);
-      setNotificationType('cancellation');
-      
-      // Hide notification after 3 seconds
-      setTimeout(() => {
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, []);
+
+    const handleDismiss = () => {
         setShowNotification(false);
-      }, 3000);
+    };
+
+    if (!showNotification || !appointmentData) {
+        return <>{children}</>;
     }
-  };
 
-  const handleCloseNotification = () => {
-    setShowNotification(false);
-  };
-
-  return (
-    <div>
-      <Navbar />
-      {children}
-      
-      {isLoggedIn && appointmentData && showNotification && (
-        <div className={`notification ${notificationType}`}>
-          <div className="notification-header">
-            {notificationType === 'booking' ? (
-              <FontAwesomeIcon icon={faCalendarCheck} className="notification-icon" />
-            ) : (
-              <FontAwesomeIcon icon={faCalendarTimes} className="notification-icon" />
-            )}
-            <h3>
-              {notificationType === 'booking' 
-                ? 'Appointment Booked!' 
-                : 'Appointment Cancelled'}
-            </h3>
-            <button className="close-btn" onClick={handleCloseNotification}>
-              <FontAwesomeIcon icon={faTimes} />
-            </button>
-          </div>
-          
-          <div className="notification-body">
-            <div className="notification-detail">
-              <span className="detail-label">Patient:</span>
-              <span>{username}</span>
+    return (
+        <div>
+            {children}
+            <div className="notification-container">
+                <div className="notification-card">
+                    <div className="notification-header">
+                        <h3>Appointment Details</h3>
+                        <button className="close-button" onClick={handleDismiss}>×</button>
+                    </div>
+                    <div className="notification-content">
+                        <p><strong>Doctor:</strong> {doctorData?.name}</p>
+                        <p><strong>Specialty:</strong> {doctorData?.speciality}</p>
+                        <p><strong>Name:</strong> {username}</p>
+                        {appointmentData.patientPhone && (
+                            <p><strong>Phone Number:</strong> {appointmentData.patientPhone}</p>
+                        )}
+                        <p><strong>Date:</strong> {appointmentData.date}</p>
+                        <p><strong>Time:</strong> {appointmentData.time}</p>
+                    </div>
+                    <div className="notification-actions">
+                        <button className="dismiss-button" onClick={handleDismiss}>
+                            Dismiss
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div className="notification-detail">
-              <span className="detail-label">Doctor:</span>
-              <span>{doctorData?.name}</span>
-            </div>
-            <div className="notification-detail">
-              <span className="detail-label">Specialty:</span>
-              <span>{doctorData?.speciality}</span>
-            </div>
-            {appointmentData.date && (
-              <div className="notification-detail">
-                <span className="detail-label">Date:</span>
-                <span>{new Date(appointmentData.date).toLocaleDateString()}</span>
-              </div>
-            )}
-            {appointmentData.time && (
-              <div className="notification-detail">
-                <span className="detail-label">Time:</span>
-                <span>{appointmentData.time}</span>
-              </div>
-            )}
-            {notificationType === 'booking' && (
-              <button 
-                className="cancel-btn"
-                onClick={handleCancelAppointment}
-              >
-                Cancel Appointment
-              </button>
-            )}
-          </div>
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default Notification;
