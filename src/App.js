@@ -11,14 +11,24 @@ import FindDoctorSearchIC from './components/FindDoctorSearchIC/FindDoctorSearch
 import AppointmentFormIC from './components/AppointmentFormIC/AppointmentFormIC';
 import Notification from './components/Notification/Notification';
 import ReviewForm from './components/ReviewForm/ReviewForm';
+import ReviewsTable from './components/ReviewForm/ReviewsTable';
 import './App.css';
 
 function App() {
   // State for review form
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [currentDoctor, setCurrentDoctor] = useState(null);
+  const [reviews, setReviews] = useState([]);
 
-  // Create wrapped components
+  // Handler for review submission
+  const handleReviewSubmit = (reviewData) => {
+    setReviews([...reviews, reviewData]);
+    setShowReviewForm(false);
+    // Here you would typically send the review to your backend
+    console.log('Review submitted:', reviewData);
+  };
+
+  // Create wrapped DoctorCard component with review functionality
   const DoctorCardWithReview = (props) => {
     return (
       <DoctorCardIC 
@@ -34,12 +44,6 @@ function App() {
     );
   };
 
-  const handleReviewSubmit = (reviewData) => {
-    console.log('Review submitted:', reviewData);
-    setShowReviewForm(false);
-    // Here you would typically send the review to your backend
-  };
-
   return (
     <div className="App">
       <Router>
@@ -52,9 +56,9 @@ function App() {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<SignUp />} />
-                <Route path="/InstantConsultation" element={<InstantConsultation />} />
+                <Route path="/instant-consultation" element={<InstantConsultation />} />
                 <Route 
-                  path="/BookingConsultation" 
+                  path="/booking-consultation" 
                   element={
                     <BookingConsultation 
                       DoctorCardComponent={DoctorCardWithReview}
@@ -62,6 +66,10 @@ function App() {
                       AppointmentFormComponent={AppointmentFormIC}
                     />
                   } 
+                />
+                <Route 
+                  path="/reviews" 
+                  element={<ReviewsTable reviews={reviews} />} 
                 />
                 <Route path="*" element={<div>Page Not Found</div>} />
               </Routes>

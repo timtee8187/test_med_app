@@ -1,111 +1,135 @@
 import React, { useState } from 'react';
 import './ReviewForm.css';
 
-const ReviewForm = ({ doctorName, doctorSpeciality, onSubmit, onClose }) => {
+function ReviewForm({ doctorName, doctorSpeciality }) {
+  const [showForm, setShowForm] = useState(false);
+  const [submittedMessage, setSubmittedMessage] = useState('');
+  const [showWarning, setShowWarning] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     review: '',
-    rating: 0,
-    hoverRating: 0
+    rating: 0
   });
-  const [errors, setErrors] = useState({});
+  const [hoverRating, setHoverRating] = useState(0);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
+  const handleButtonClick = () => {
+    setShowForm(true);
+    setSubmittedMessage('');
   };
 
-  const handleRating = (rating) => {
-    setFormData(prev => ({ ...prev, rating }));
-    if (errors.rating) setErrors(prev => ({ ...prev, rating: '' }));
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleRatingClick = (rating) => {
+    setFormData({ ...formData, rating });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Validate form
-    const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
-    if (!formData.review.trim()) newErrors.review = 'Review is required';
-    if (formData.rating === 0) newErrors.rating = 'Please select a rating';
-    
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
+    if (formData.name && formData.review && formData.rating > 0) {
+      setSubmittedMessage(`Thank you for reviewing Dr. ${doctorName}!`);
+      setShowWarning(false);
+      // In a real app, you would send this data to your backend
+      console.log('Review submitted:', {
+        doctor: doctorName,
+        ...formData
+      });
+      setFormData({
+        name: '',
+        review: '',
+        rating: 0
+      });
+      setTimeout(() => {
+        setShowForm(false);
+      }, 2000);
+    } else {
+      setShowWarning(true);
     }
-    
-    onSubmit({
-      doctorName,
-      doctorSpeciality,
-      ...formData,
-      date: new Date().toLocaleDateString()
-    });
   };
 
   return (
-    <div className="review-form-overlay">
-      <div className="review-form-container">
-        <button className="close-btn" onClick={onClose}>×</button>
-        <h2>Review Dr. {doctorName}</h2>
-        <p className="speciality">{doctorSpeciality}</p>
-        
-        <form onSubmit={handleSubmit}>
-          {Object.keys(errors).length > 0 && (
-            <div className="error-message">
-              Please fill out all required fields
-            </div>
+    <div className="review-container">
+      {!showForm ? (
+        <button className="feedback-button" onClick={handleButtonClick}>
+          Click Here
+        </button>
+      ) : (
+        <form className="review-form" onSubmit={handleSubmit}>
+          <h2>Give Your Review</h2>
+          <p className="doctor-info">Dr. {doctorName} ({doctorSpeciality})</p>
+          
+          {showWarning && (
+            <p className="warning">Please fill out all fields including the rating.</p>
           )}
-
-          <div className={`form-group ${errors.name ? 'has-error' : ''}`}>
-            <label>Your Name</label>
+          
+          <div className="form-group">
+            <label htmlFor="name">Your Name:</label>
             <input
               type="text"
+              id="name"
               name="name"
               value={formData.name}
               onChange={handleChange}
               placeholder="Enter your name"
+              required
             />
-            {errors.name && <span className="field-error">{errors.name}</span>}
           </div>
-
-          <div className={`form-group ${errors.review ? 'has-error' : ''}`}>
-            <label>Your Review</label>
+          
+          <div className="form-group">
+            <label htmlFor="review">Your Review:</label>
             <textarea
+              id="review"
               name="review"
               value={formData.review}
               onChange={handleChange}
               placeholder="Share your experience..."
-              rows="5"
+              required
             />
-            {errors.review && <span className="field-error">{errors.review}</span>}
           </div>
-
-          <div className={`form-group ${errors.rating ? 'has-error' : ''}`}>
-            <label>Rating</label>
-            <div className="star-rating">
+          
+          <div className="form-group">
+            <label>Rating:</label>
+            <div className="rating-stars">
               {[1, 2, 3, 4, 5].map((star) => (
                 <span
                   key={star}
-                  className={`star ${star <= (formData.hoverRating || formData.rating) ? 'filled' : ''}`}
-                  onClick={() => handleRating(star)}
-                  onMouseEnter={() => setFormData(prev => ({ ...prev, hoverRating: star }))}
-                  onMouseLeave={() => setFormData(prev => ({ ...prev, hoverRating: 0 }))}
+                  className={`star ${star <= (hoverRating || formData.rating) ? 'filled' : ''}`}
+                  onClick={() => handleRatingClick(star)}
+                  onMouseEnter={() => setHoverRating(star)}
+                  onMouseLeave={() => setHoverRating(0)}
+                  aria-label={`${star} star`}
                 >
                   ★
                 </span>
               ))}
+              <span className="rating-text">
+                {formData.rating > 0 ? `${formData.rating} star${formData.rating > 1 ? 's' : ''}` : 'Select rating'}
+              </span>
             </div>
-            {errors.rating && <span className="field-error">{errors.rating}</span>}
           </div>
-
-          <button type="submit" className="submit-btn">
-            Submit Review
-          </button>
+          
+          <div className="form-actions">
+            <button type="submit" className="submit-button">Submit Review</button>
+            <button 
+              type="button" 
+              className="cancel-button"
+              onClick={() => setShowForm(false)}
+            >
+              Cancel
+            </button>
+          </div>
         </form>
-      </div>
+      )}
+      
+      {submittedMessage && (
+        <div className="submitted-message">
+          <p>{submittedMessage}</p>
+        </div>
+      )}
     </div>
   );
-};
+}
 
 export default ReviewForm;
