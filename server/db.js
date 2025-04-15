@@ -9,7 +9,7 @@ const connectToMongo = async (retryCount = 0) => {
         
         // Use environment variable or fallback to local connection
         const mongoURI = process.env.MONGO_URI || 
-            'mongodb://root:xVER0OHYiT06xaVeEwwX6qNk@172.21.224.105:27017/stayhealthybeta1?authSource=admin';
+            'mongodb://root:dWcyGpu8IXvmT21negTFz3Df@172.21.74.37:27017/stayhealthybeta1?authSource=admin';
         
         console.log('Attempting MongoDB connection to:', 
             mongoURI.replace(/:[^@]+@/, ':*****@'));

@@ -12,16 +12,6 @@ const initSpeciality = [
     'Ayurveda'
 ];
 
-const specialtyCounts = {
-    'Dentist': 3,
-    'Gynecologist/obstetrician': 2,
-    'General Physician': 4,
-    'Dermatologist': 2,
-    'Ear-nose-throat (ent) Specialist': 2,
-    'Homeopath': 2,
-    'Ayurveda': 2
-};
-
 const FindDoctorSearchIC = ({ onSearch }) => {
     const [doctorResultHidden, setDoctorResultHidden] = useState(true);
     const [searchDoctor, setSearchDoctor] = useState('');
@@ -32,7 +22,7 @@ const FindDoctorSearchIC = ({ onSearch }) => {
         setSearchDoctor(speciality);
         setDoctorResultHidden(true);
         if (onSearch) {
-            onSearch(speciality);
+            onSearch({ speciality });
         }
         navigate(`/instant-consultation?speciality=${encodeURIComponent(speciality)}`);
     };
@@ -84,9 +74,6 @@ const FindDoctorSearchIC = ({ onSearch }) => {
                                         />
                                     </span>
                                     <span>{speciality}</span>
-                                    <span className="speciality-count">
-                                        ({specialtyCounts[speciality] || 0} doctors available)
-                                    </span>
                                 </div>
                             ))}
                         </div>

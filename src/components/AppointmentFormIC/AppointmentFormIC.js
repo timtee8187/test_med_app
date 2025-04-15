@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './AppointmentFormIC.css';
 
-const AppointmentFormIC = ({ doctor: propDoctor, onSubmit }) => {
+const AppointmentFormIC = ({ doctor: propDoctor, onSubmit, onCancel }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [doctor, setDoctor] = useState(propDoctor || {});
@@ -133,16 +133,28 @@ const AppointmentFormIC = ({ doctor: propDoctor, onSubmit }) => {
           required
         >
           <option value="">Select a time</option>
-          <option value="9:00 AM">9:00 AM</option>
-          <option value="11:00 AM">11:00 AM</option>
-          <option value="2:00 PM">2:00 PM</option>
-          <option value="4:00 PM">4:00 PM</option>
+          <option value="9:00 AM - 10:00 AM">9:00 AM - 10:00 AM</option>
+          <option value="10:00 AM - 11:00 AM">10:00 AM - 11:00 AM</option>
+          <option value="11:00 AM - 12:00 PM">11:00 AM - 12:00 PM</option>
+          <option value="1:00 PM - 2:00 PM">1:00 PM - 2:00 PM</option>
+          <option value="2:00 PM - 3:00 PM">2:00 PM - 3:00 PM</option>
+          <option value="3:00 PM - 4:00 PM">3:00 PM - 4:00 PM</option>
+          <option value="4:00 PM - 5:00 PM">4:00 PM - 5:00 PM</option>
         </select>
       </div>
       
-      <button type="submit" className="submit-btn">
-        Confirm Booking
-      </button>
+      <div className="form-actions">
+        <button type="submit" className="book-now-btn">
+          Book Now
+        </button>
+        <button 
+          type="button" 
+          className="cancel-btn"
+          onClick={onCancel || (() => navigate(-1))}
+        >
+          Cancel
+        </button>
+      </div>
     </form>
   );
 };

@@ -14,6 +14,7 @@ const InstantConsultation = () => {
 
   const fetchDoctors = useCallback(async () => {
     try {
+      // In a real app, replace this with your actual API endpoint
       const response = await fetch('https://api.npoint.io/9a5543d36f1460da2f63');
       if (!response.ok) throw new Error('Failed to fetch doctors');
       
@@ -33,13 +34,28 @@ const InstantConsultation = () => {
     }
   }, []);
 
-  const handleSearch = useCallback((searchText) => {
+  const handleSearch = useCallback((searchData) => {
+    const searchText = typeof searchData === 'string' ? searchData : searchData.speciality;
     const speciality = searchParams.get('speciality') || searchText;
+    
     const filtered = doctors.filter(doctor =>
       doctor.speciality.toLowerCase().includes(speciality.toLowerCase()) ||
       doctor.name.toLowerCase().includes(searchText.toLowerCase())
     );
-    setFilteredDoctors(filtered);
+    
+    // Count doctors by specialty for the filtered results
+    const specialtyCounts = filtered.reduce((acc, doctor) => {
+      acc[doctor.speciality] = (acc[doctor.speciality] || 0) + 1;
+      return acc;
+    }, {});
+    
+    // Add count to each doctor
+    const withCounts = filtered.map(doctor => ({
+      ...doctor,
+      doctorCount: specialtyCounts[doctor.speciality] || 0
+    }));
+    
+    setFilteredDoctors(withCounts);
   }, [doctors, searchParams]);
 
   useEffect(() => {
@@ -52,7 +68,18 @@ const InstantConsultation = () => {
         if (speciality) {
           handleSearch(speciality);
         } else {
-          setFilteredDoctors(fetchedDoctors);
+          // Initialize with all doctors and their counts
+          const specialtyCounts = fetchedDoctors.reduce((acc, doctor) => {
+            acc[doctor.speciality] = (acc[doctor.speciality] || 0) + 1;
+            return acc;
+          }, {});
+          
+          const withCounts = fetchedDoctors.map(doctor => ({
+            ...doctor,
+            doctorCount: specialtyCounts[doctor.speciality] || 0
+          }));
+          
+          setFilteredDoctors(withCounts);
         }
       } catch (err) {
         setError(err.message);
@@ -65,10 +92,7 @@ const InstantConsultation = () => {
   }, [searchParams, fetchDoctors, handleSearch]);
 
   const handleBookAppointment = (bookingData) => {
-    // Save booking data to localStorage or state management
     localStorage.setItem('bookingData', JSON.stringify(bookingData));
-    
-    // Navigate to booking confirmation page
     navigate('/booking-confirmation', { 
       state: { 
         doctor: {
@@ -94,7 +118,14 @@ const InstantConsultation = () => {
             <DoctorCardIC 
               key={doctor.id} 
               {...doctor}
-              onBook={handleBookAppointment}
+              onBook={() => handleBookAppointment({
+                doctorId: doctor.id,
+                doctorName: doctor.name,
+                doctorSpeciality: doctor.speciality,
+                doctorExperience: doctor.experience,
+                doctorRating: doctor.ratings,
+                doctorFees: doctor.consultationFees
+              })}
             />
           ))
         ) : (
