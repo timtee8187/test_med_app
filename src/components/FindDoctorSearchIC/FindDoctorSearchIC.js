@@ -12,7 +12,6 @@ const initSpeciality = [
     'Ayurveda'
 ];
 
-// Updated doctor counts with balanced distribution
 const specialtyCounts = {
     'Dentist': 3,
     'Gynecologist/obstetrician': 2,
@@ -23,7 +22,7 @@ const specialtyCounts = {
     'Ayurveda': 2
 };
 
-const FindDoctorSearchIC = () => {
+const FindDoctorSearchIC = ({ onSearch }) => {
     const [doctorResultHidden, setDoctorResultHidden] = useState(true);
     const [searchDoctor, setSearchDoctor] = useState('');
     const [specialities] = useState(initSpeciality);
@@ -32,7 +31,10 @@ const FindDoctorSearchIC = () => {
     const handleDoctorSelect = (speciality) => {
         setSearchDoctor(speciality);
         setDoctorResultHidden(true);
-        navigate(`/instant-consultation?speciality=${speciality}`);
+        if (onSearch) {
+            onSearch(speciality);
+        }
+        navigate(`/instant-consultation?speciality=${encodeURIComponent(speciality)}`);
     };
 
     const filteredSpecialities = specialities.filter(spec =>
@@ -56,6 +58,7 @@ const FindDoctorSearchIC = () => {
                             onChange={(e) => {
                                 setSearchDoctor(e.target.value);
                                 setDoctorResultHidden(false);
+                                if (onSearch) onSearch(e.target.value);
                             }}
                             onFocus={() => setDoctorResultHidden(false)}
                             onBlur={() => setTimeout(() => setDoctorResultHidden(true), 200)}

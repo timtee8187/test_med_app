@@ -1,0 +1,171 @@
+.reviews-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.reviews-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.reviews-header h1 {
+  margin-bottom: 10px;
+  color: #2c3e50;
+}
+
+.reviews-stats {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.reviews-table {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.reviews-table th {
+  background-color: #2190FF;
+  color: white;
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.reviews-table td {
+  padding: 15px;
+  border-bottom: 1px solid #e0e0e0;
+  vertical-align: middle;
+}
+
+.reviews-table tr:last-child td {
+  border-bottom: none;
+}
+
+.reviews-table tr:hover {
+  background-color: #f5f9ff;
+}
+
+.doctor-profile {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.doctor-photo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.doctor-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #555;
+}
+
+.doctor-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.doctor-info h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.speciality {
+  font-size: 14px;
+  color: #666;
+}
+
+.rating-display {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.stars {
+  display: flex;
+  gap: 2px;
+}
+
+.stars span {
+  color: #f1c40f;
+}
+
+.average-rating {
+  margin-left: 5px;
+  color: #666;
+  font-size: 14px;
+}
+
+.no-reviews {
+  color: #666;
+  font-style: italic;
+}
+
+.review-button {
+  padding: 8px 15px;
+  background-color: #2190FF;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.review-button:hover {
+  background-color: #1976D2;
+}
+
+.reviews-loading, .reviews-error {
+  text-align: center;
+  padding: 50px;
+  font-size: 18px;
+}
+
+.reviews-error {
+  color: #e74c3c;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .reviews-table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .reviews-table th, 
+  .reviews-table td {
+    padding: 10px;
+    font-size: 14px;
+  }
+  
+  .doctor-profile {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .doctor-photo,
+  .doctor-avatar {
+    width: 40px;
+    height: 40px;
+  }
+}

@@ -1,77 +1,22 @@
-.specialty-group {
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid #eee;
+.consultation-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-.specialty-title {
-    color: #2190FF;
-    margin-bottom: 1rem;
-    font-size: 1.3rem;
+.doctors-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+  margin-top: 30px;
 }
 
-.doctor-count {
-    color: #666;
-    font-size: 0.9rem;
-    font-weight: normal;
+.loading, .error {
+  text-align: center;
+  padding: 50px;
+  font-size: 18px;
 }
 
-.doctors-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1rem;
-}
-.searchpage-container {
-    max-width: 1200px;
-    margin: auto;
-    margin-top:10%;
-    color: #414146;
-    padding: 0 20px;
-    position: static;
-    width: 100%;
-}
-.searchpage-container img {
-    max-width: 100%;
-}
-.search-results-container .doctorcard{
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-    padding: 18px;
-    border-radius: 4px;
-    background-color: #fff;
-
-}
-
-.search-results-container>h2 {
-    text-align: left;
-    font-size: 24px;
-    font-weight: 700;
-}
-
-.search-results-container>h3 {
-    margin-top: 12px;
-    color: #2d2d32;
-    text-align: left;
-    font-size: 15px;
-}
-/* Add this to your existing CSS */
-.search-results-container > h2 {
-    color: #2d2d32;
-    margin-bottom: 8px;
-}
-
-.search-results-container > h3 {
-    margin-top: 0;
-    margin-bottom: 20px;
-}
-
-.doctors-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
+.error {
+  color: #e74c3c;
 }

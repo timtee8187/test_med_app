@@ -1,156 +1,150 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './AppointmentFormIC.css';
 
-const AppointmentFormIC = ({ doctorName, doctorSpeciality, onSubmit, onCancel }) => {
-    const [formData, setFormData] = useState({
-        name: '',
-        phoneNumber: '',
-        date: '',
-        timeSlot: ''
-    });
+const AppointmentFormIC = ({ doctor: propDoctor, onSubmit }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [doctor, setDoctor] = useState(propDoctor || {});
+  const [formData, setFormData] = useState({
+    patientName: '',
+    phone: '',
+    date: '',
+    timeSlot: ''
+  });
+
+  // Get doctor data from various sources with fallbacks
+  useEffect(() => {
+    const getDoctorData = () => {
+      // 1. Check props first
+      if (propDoctor) return;
+      
+      // 2. Check location state
+      if (location.state?.doctor) {
+        setDoctor(location.state.doctor);
+        return;
+      }
+      
+      // 3. Check localStorage
+      const savedDoctor = JSON.parse(localStorage.getItem('selectedDoctor'));
+      if (savedDoctor) {
+        setDoctor(savedDoctor);
+        return;
+      }
+      
+      // 4. Default fallback
+      setDoctor({
+        id: 'default',
+        name: 'Dr. Unknown',
+        speciality: 'General Physician',
+        experience: '5',
+        ratings: '4.5',
+        consultationFees: '$100'
+      });
+    };
+
+    getDoctorData();
+  }, [propDoctor, location.state]);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
     
-    // Available time slots - now actually used in the JSX
-    const timeSlots = [
-        '9:00 AM - 10:00 AM',
-        '10:00 AM - 11:00 AM',
-        '11:00 AM - 12:00 PM', 
-        '2:00 PM - 3:00 PM',
-        '3:00 PM - 4:00 PM',
-        '4:00 PM - 5:00 PM'
-    ];
-
-    const [errors, setErrors] = useState({});
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-        // Clear error when user types
-        if (errors[name]) {
-            setErrors(prev => ({ ...prev, [name]: '' }));
-        }
+    const bookingData = {
+      doctorId: doctor.id,
+      doctorName: doctor.name,
+      doctorSpeciality: doctor.speciality,
+      doctorExperience: doctor.experience,
+      doctorRating: doctor.ratings,
+      doctorFees: doctor.consultationFees,
+      ...formData,
+      bookingDate: new Date().toISOString()
     };
+    
+    // Save to localStorage
+    localStorage.setItem('bookingData', JSON.stringify(bookingData));
+    
+    // Navigate to booking confirmation
+    navigate('/booking-consultation', { state: { booking: bookingData } });
+    
+    // Call parent onSubmit if provided
+    if (onSubmit) onSubmit();
+  };
 
-    const validateForm = () => {
-        const newErrors = {};
-        if (!formData.name.trim()) newErrors.name = 'Name is required';
-        if (!formData.phoneNumber.trim()) newErrors.phoneNumber = 'Phone number is required';
-        if (!formData.date) newErrors.date = 'Date is required';
-        if (!formData.timeSlot) newErrors.timeSlot = 'Time slot is required';
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
+  if (!doctor.name) {
+    return <div className="loading">Loading doctor information...</div>;
+  }
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (validateForm()) {
-            // Save to storage
-            localStorage.setItem('doctorData', JSON.stringify({
-                name: doctorName,
-                speciality: doctorSpeciality
-            }));
-            
-            localStorage.setItem(doctorName, JSON.stringify({
-                date: formData.date,
-                time: formData.timeSlot,
-                patient: formData.name
-            }));
-            
-            sessionStorage.setItem('email', formData.name);
-            
-            onSubmit({
-                ...formData,
-                doctorName,
-                doctorSpeciality
-            });
-            
-            setFormData({
-                name: '',
-                phoneNumber: '',
-                date: '',
-                timeSlot: ''
-            });
-        }
-    };
+  return (
+    <form onSubmit={handleSubmit} className="appointment-form">
+      <div className="doctor-header">
+        <h3>Book Appointment with Dr. {doctor.name}</h3>
+        <p className="speciality">{doctor.speciality}</p>
+        <p className="details">
+          {doctor.experience} years experience • Rating: {doctor.ratings} • Fee: {doctor.consultationFees}
+        </p>
+      </div>
 
-    return (
-        <form onSubmit={handleSubmit} className="appointment-form">
-            <h3>Booking with {doctorName}</h3>
-            <p>Specialty: {doctorSpeciality}</p>
-
-            <div className="form-group">
-                <label htmlFor="name">Full Name:</label>
-                <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className={errors.name ? 'error' : ''}
-                />
-                {errors.name && <span className="error-message">{errors.name}</span>}
-            </div>
-
-            <div className="form-group">
-                <label htmlFor="phoneNumber">Phone Number:</label>
-                <input
-                    type="tel"
-                    id="phoneNumber"
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
-                    onChange={handleChange}
-                    className={errors.phoneNumber ? 'error' : ''}
-                />
-                {errors.phoneNumber && <span className="error-message">{errors.phoneNumber}</span>}
-            </div>
-
-            <div className="form-group">
-                <label htmlFor="date">Appointment Date:</label>
-                <input
-                    type="date"
-                    id="date"
-                    name="date"
-                    value={formData.date}
-                    onChange={handleChange}
-                    min={new Date().toISOString().split('T')[0]}
-                    className={errors.date ? 'error' : ''}
-                />
-                {errors.date && <span className="error-message">{errors.date}</span>}
-            </div>
-
-            <div className="form-group">
-                <label htmlFor="timeSlot">Time Slot:</label>
-                <select
-                    id="timeSlot"
-                    name="timeSlot"
-                    value={formData.timeSlot}
-                    onChange={handleChange}
-                    className={errors.timeSlot ? 'error' : ''}
-                >
-                    <option value="">Select a time slot</option>
-                    {timeSlots.map((slot, index) => (
-                        <option key={index} value={slot}>{slot}</option>
-                    ))}
-                </select>
-                {errors.timeSlot && <span className="error-message">{errors.timeSlot}</span>}
-            </div>
-
-            <div className="form-buttons">
-                <button type="submit" className="submit-btn">
-                    Book Now
-                </button>
-                <button 
-                    type="button" 
-                    className="cancel-btn"
-                    onClick={onCancel}
-                >
-                    Cancel
-                </button>
-            </div>
-        </form>
-    );
+      <div className="form-group">
+        <label>Your Full Name:</label>
+        <input
+          type="text"
+          name="patientName"
+          value={formData.patientName}
+          onChange={handleChange}
+          required
+          placeholder="Enter your name"
+        />
+      </div>
+      
+      <div className="form-group">
+        <label>Phone Number:</label>
+        <input
+          type="tel"
+          name="phone"
+          value={formData.phone}
+          onChange={handleChange}
+          required
+          placeholder="Enter phone number"
+        />
+      </div>
+      
+      <div className="form-group">
+        <label>Appointment Date:</label>
+        <input
+          type="date"
+          name="date"
+          value={formData.date}
+          onChange={handleChange}
+          min={new Date().toISOString().split('T')[0]}
+          required
+        />
+      </div>
+      
+      <div className="form-group">
+        <label>Time Slot:</label>
+        <select
+          name="timeSlot"
+          value={formData.timeSlot}
+          onChange={handleChange}
+          required
+        >
+          <option value="">Select a time</option>
+          <option value="9:00 AM">9:00 AM</option>
+          <option value="11:00 AM">11:00 AM</option>
+          <option value="2:00 PM">2:00 PM</option>
+          <option value="4:00 PM">4:00 PM</option>
+        </select>
+      </div>
+      
+      <button type="submit" className="submit-btn">
+        Confirm Booking
+      </button>
+    </form>
+  );
 };
 
 export default AppointmentFormIC;
