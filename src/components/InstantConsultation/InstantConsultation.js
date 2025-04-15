@@ -14,7 +14,6 @@ const InstantConsultation = () => {
 
   const fetchDoctors = useCallback(async () => {
     try {
-      // In a real app, replace this with your actual API endpoint
       const response = await fetch('https://api.npoint.io/9a5543d36f1460da2f63');
       if (!response.ok) throw new Error('Failed to fetch doctors');
       
@@ -35,6 +34,7 @@ const InstantConsultation = () => {
   }, []);
 
   const handleSearch = useCallback((searchData) => {
+    // Handle both string (from input) and object (from specialty selection)
     const searchText = typeof searchData === 'string' ? searchData : searchData.speciality;
     const speciality = searchParams.get('speciality') || searchText;
     
@@ -66,7 +66,7 @@ const InstantConsultation = () => {
         
         const speciality = searchParams.get('speciality');
         if (speciality) {
-          handleSearch(speciality);
+          handleSearch({ speciality });
         } else {
           // Initialize with all doctors and their counts
           const specialtyCounts = fetchedDoctors.reduce((acc, doctor) => {

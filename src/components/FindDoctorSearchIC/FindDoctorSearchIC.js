@@ -22,7 +22,7 @@ const FindDoctorSearchIC = ({ onSearch }) => {
         setSearchDoctor(speciality);
         setDoctorResultHidden(true);
         if (onSearch) {
-            onSearch({ speciality });
+            onSearch({ speciality }); // Pass as object
         }
         navigate(`/instant-consultation?speciality=${encodeURIComponent(speciality)}`);
     };
@@ -48,7 +48,7 @@ const FindDoctorSearchIC = ({ onSearch }) => {
                             onChange={(e) => {
                                 setSearchDoctor(e.target.value);
                                 setDoctorResultHidden(false);
-                                if (onSearch) onSearch(e.target.value);
+                                if (onSearch) onSearch(e.target.value); // Pass string directly
                             }}
                             onFocus={() => setDoctorResultHidden(false)}
                             onBlur={() => setTimeout(() => setDoctorResultHidden(true), 200)}
