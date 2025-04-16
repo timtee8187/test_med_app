@@ -3,13 +3,9 @@ import './FindDoctorSearchIC.css';
 import { useNavigate } from 'react-router-dom';
 
 const initSpeciality = [
-    'Dentist', 
-    'Gynecologist/obstetrician', 
-    'General Physician', 
-    'Dermatologist', 
-    'Ear-nose-throat (ent) Specialist', 
-    'Homeopath', 
-    'Ayurveda'
+    'Dentist', 'Gynecologist', 'General Physician', 'Dermatologist', 
+    'ENT Specialist', 'Homeopath', 'Ayurveda', 'Cardiologist',
+    'Pediatrician', 'Neurologist', 'Orthopedic', 'Psychiatrist'
 ];
 
 const FindDoctorSearchIC = ({ onSearch }) => {
@@ -21,65 +17,55 @@ const FindDoctorSearchIC = ({ onSearch }) => {
     const handleDoctorSelect = (speciality) => {
         setSearchDoctor(speciality);
         setDoctorResultHidden(true);
-        if (onSearch) {
-            onSearch({ speciality }); // Pass as object
-        }
-        navigate(`/instant-consultation?speciality=${encodeURIComponent(speciality)}`);
+        onSearch(speciality);
+        navigate(`/instant-consultation?speciality=${speciality}`);
     };
 
-    const filteredSpecialities = specialities.filter(spec =>
-        spec.toLowerCase().includes(searchDoctor.toLowerCase())
-    );
+    const handleInputChange = (e) => {
+        setSearchDoctor(e.target.value);
+        onSearch(e.target.value);
+    };
 
     return (
-        <div className='finddoctor'>
-            <center>
-                <h1>Find a doctor and Consult instantly</h1>
-                <div>
-                    <i style={{color:'#000000', fontSize:'20rem'}} className="fa fa-user-md"></i>
-                </div>
-                <div className="home-search-container" style={{display:'flex', justifyContent:'center', alignItems:'center'}}>
-                    <div className="doctor-search-box">
-                        <input 
-                            type="text" 
-                            className="search-doctor-input-box" 
-                            placeholder="Search doctors, clinics, hospitals, etc." 
-                            value={searchDoctor}
-                            onChange={(e) => {
-                                setSearchDoctor(e.target.value);
-                                setDoctorResultHidden(false);
-                                if (onSearch) onSearch(e.target.value); // Pass string directly
-                            }}
-                            onFocus={() => setDoctorResultHidden(false)}
-                            onBlur={() => setTimeout(() => setDoctorResultHidden(true), 200)}
-                        />
-                        
-                        <div className="findiconimg">
-                            <img className='findIcon' src={process.env.PUBLIC_URL + '/images/search.svg'} alt=""/>
-                        </div>
-                        
-                        <div className="search-doctor-input-results" hidden={doctorResultHidden || filteredSpecialities.length === 0}>
-                            {filteredSpecialities.map(speciality => (
+        <div className='finddoctor-container'>
+            <h1>Find a doctor and Consult instantly</h1>
+            <div className="doctor-icon">
+                <i className="fa fa-user-md"></i>
+            </div>
+            <div className="home-search-container">
+                <div className="doctor-search-box">
+                    <input 
+                        type="text" 
+                        className="search-doctor-input-box" 
+                        placeholder="Search doctors by name or specialty..." 
+                        onFocus={() => setDoctorResultHidden(false)}
+                        onBlur={() => setTimeout(() => setDoctorResultHidden(true), 200)}
+                        value={searchDoctor} 
+                        onChange={handleInputChange} 
+                    />
+                    <div className="findiconimg">
+                        <i className="fa fa-search"></i>
+                    </div>
+                    <div className="search-doctor-input-results" hidden={doctorResultHidden || !searchDoctor}>
+                        {specialities
+                            .filter(speciality => 
+                                speciality.toLowerCase().includes(searchDoctor.toLowerCase())
+                            )
+                            .map(speciality => (
                                 <div 
                                     className="search-doctor-result-item" 
-                                    key={speciality}
+                                    key={speciality} 
                                     onMouseDown={() => handleDoctorSelect(speciality)}
                                 >
-                                    <span>
-                                        <img 
-                                            src={process.env.PUBLIC_URL + '/images/search.svg'} 
-                                            alt="" 
-                                            style={{height:"10px", width:"10px"}} 
-                                            width="12" 
-                                        />
-                                    </span>
+                                    <span><i className="fa fa-search"></i></span>
                                     <span>{speciality}</span>
+                                    <span>SPECIALITY</span>
                                 </div>
-                            ))}
-                        </div>
+                            ))
+                        }
                     </div>
                 </div>
-            </center>
+            </div>
         </div>
     );
 };

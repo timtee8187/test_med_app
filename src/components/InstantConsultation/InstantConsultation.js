@@ -1,136 +1,112 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import './InstantConsultation.css';
+import { useSearchParams } from 'react-router-dom';
 import FindDoctorSearchIC from '../FindDoctorSearchIC/FindDoctorSearchIC';
 import DoctorCardIC from '../DoctorCardIC/DoctorCardIC';
-import './InstantConsultation.css';
 
-const InstantConsultation = () => {
+const InstantConsultation = ({ onAppointmentChange }) => {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [doctors, setDoctors] = useState([]);
   const [filteredDoctors, setFilteredDoctors] = useState([]);
+  const [isSearched, setIsSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const fetchDoctors = useCallback(async () => {
+  
+  const getDoctorsDetails = useCallback(async () => {
     try {
+      setIsLoading(true);
       const response = await fetch('https://api.npoint.io/9a5543d36f1460da2f63');
-      if (!response.ok) throw new Error('Failed to fetch doctors');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch doctors data');
+      }
       
       const data = await response.json();
-      return data.map(doctor => ({
-        id: doctor.id || Math.random().toString(36).slice(2),
-        name: doctor.name || 'Dr. Unknown',
-        speciality: doctor.speciality || 'General Physician',
-        experience: doctor.experience || '5',
-        ratings: doctor.ratings || '4.5',
-        profilePic: doctor.profilePic || process.env.PUBLIC_URL + '/images/default-doctor.png',
-        consultationFees: doctor.consultationFees || '$100',
-        availableSlots: doctor.availableSlots || ['10:00 AM', '02:00 PM', '04:00 PM']
-      }));
+      setDoctors(data);
+      
+      if (searchParams.get('speciality')) {
+        const filtered = data.filter(doctor => 
+          doctor.speciality.toLowerCase() === searchParams.get('speciality').toLowerCase()
+        );
+        setFilteredDoctors(filtered);
+        setIsSearched(true);
+      } else {
+        setFilteredDoctors(data);
+        setIsSearched(true);
+      }
     } catch (err) {
-      throw err;
+      console.error('Error fetching doctors:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
+  }, [searchParams]);
 
-  const handleSearch = useCallback((searchData) => {
-    // Handle both string (from input) and object (from specialty selection)
-    const searchText = typeof searchData === 'string' ? searchData : searchData.speciality;
-    const speciality = searchParams.get('speciality') || searchText;
-    
-    const filtered = doctors.filter(doctor =>
-      doctor.speciality.toLowerCase().includes(speciality.toLowerCase()) ||
-      doctor.name.toLowerCase().includes(searchText.toLowerCase())
-    );
-    
-    // Count doctors by specialty for the filtered results
-    const specialtyCounts = filtered.reduce((acc, doctor) => {
-      acc[doctor.speciality] = (acc[doctor.speciality] || 0) + 1;
-      return acc;
-    }, {});
-    
-    // Add count to each doctor
-    const withCounts = filtered.map(doctor => ({
-      ...doctor,
-      doctorCount: specialtyCounts[doctor.speciality] || 0
-    }));
-    
-    setFilteredDoctors(withCounts);
-  }, [doctors, searchParams]);
-
-  useEffect(() => {
-    const loadDoctors = async () => {
-      try {
-        const fetchedDoctors = await fetchDoctors();
-        setDoctors(fetchedDoctors);
-        
-        const speciality = searchParams.get('speciality');
-        if (speciality) {
-          handleSearch({ speciality });
-        } else {
-          // Initialize with all doctors and their counts
-          const specialtyCounts = fetchedDoctors.reduce((acc, doctor) => {
-            acc[doctor.speciality] = (acc[doctor.speciality] || 0) + 1;
-            return acc;
-          }, {});
-          
-          const withCounts = fetchedDoctors.map(doctor => ({
-            ...doctor,
-            doctorCount: specialtyCounts[doctor.speciality] || 0
-          }));
-          
-          setFilteredDoctors(withCounts);
-        }
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadDoctors();
-  }, [searchParams, fetchDoctors, handleSearch]);
-
-  const handleBookAppointment = (bookingData) => {
-    localStorage.setItem('bookingData', JSON.stringify(bookingData));
-    navigate('/booking-confirmation', { 
-      state: { 
-        doctor: {
-          id: bookingData.doctorId,
-          name: bookingData.doctorName,
-          speciality: bookingData.doctorSpeciality
-        },
-        appointmentDetails: bookingData
-      }
-    });
+  const handleSearch = (searchText) => {
+    if (searchText === '') {
+      setFilteredDoctors(doctors);
+      setIsSearched(true);
+    } else {
+      const filtered = doctors.filter(doctor =>
+        doctor.speciality.toLowerCase().includes(searchText.toLowerCase()) ||
+        doctor.name.toLowerCase().includes(searchText.toLowerCase())
+      );
+      setFilteredDoctors(filtered);
+      setIsSearched(true);
+    }
   };
 
-  if (isLoading) return <div className="loading">Loading doctors...</div>;
-  if (error) return <div className="error">Error: {error}</div>;
+  useEffect(() => {
+    getDoctorsDetails();
+  }, [getDoctorsDetails]);
+
+  if (isLoading) {
+    return (
+      <div className="loading-container">
+        <div className="spinner"></div>
+        <p>Loading doctors...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <p>Error loading doctors: {error}</p>
+        <button onClick={() => window.location.reload()}>Retry</button>
+      </div>
+    );
+  }
 
   return (
-    <div className="consultation-container">
+    <div className="searchpage-container">
       <FindDoctorSearchIC onSearch={handleSearch} />
-      
-      <div className="doctors-list">
-        {filteredDoctors.length > 0 ? (
-          filteredDoctors.map(doctor => (
-            <DoctorCardIC 
-              key={doctor.id} 
-              {...doctor}
-              onBook={() => handleBookAppointment({
-                doctorId: doctor.id,
-                doctorName: doctor.name,
-                doctorSpeciality: doctor.speciality,
-                doctorExperience: doctor.experience,
-                doctorRating: doctor.ratings,
-                doctorFees: doctor.consultationFees
-              })}
-            />
-          ))
+      <div className="search-results-container">
+        {isSearched ? (
+          <>
+            <h2>{filteredDoctors.length} doctors available</h2>
+            <h3>Book appointments with minimum wait-time & verified doctor details</h3>
+            {filteredDoctors.length > 0 ? (
+              <div className="doctors-grid">
+                {filteredDoctors.map(doctor => (
+                  <DoctorCardIC 
+                    key={`${doctor.name}-${doctor.experience}`}
+                    name={doctor.name}
+                    speciality={doctor.speciality}
+                    experience={doctor.experience}
+                    ratings={doctor.ratings}
+                    onAppointmentChange={onAppointmentChange}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="no-doctors">No doctors found matching your search.</p>
+            )}
+          </>
         ) : (
-          <div className="no-results">
-            No doctors found matching your search criteria.
+          <div className="welcome-message">
+            <h2>Find the right doctor for you</h2>
+            <p>Search by name or specialty to see available doctors</p>
           </div>
         )}
       </div>

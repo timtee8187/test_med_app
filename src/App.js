@@ -25,7 +25,7 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/InstantConsultation" element={<InstantConsultation />} />
             <Route path="/booking-consultation" element={<BookingConsultation />} />
-            <Route path="/notification" element={<Notification />} />
+            <Route path="/Notification" element={<Notification />} />
             <Route path="/reviewform" element={<ReviewForm />} />
             <Route path="/reviews" element={<Reviews/>} />
             <Route path="/DoctorCardIC" element={<DoctorCardIC/>} />
