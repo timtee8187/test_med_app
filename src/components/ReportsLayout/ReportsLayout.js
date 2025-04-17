@@ -97,7 +97,7 @@ const ReportsLayout = () => {
                       className="view-btn"
                       onClick={() => handleViewReport(report.reportUrl)}
                     >
-                      View
+                      View Report
                     </button>
                   </td>
                   <td>
@@ -105,7 +105,7 @@ const ReportsLayout = () => {
                       className="download-btn"
                       onClick={() => handleDownloadReport(report.reportUrl, report.doctorName)}
                     >
-                      Download
+                      Download Report
                     </button>
                   </td>
                 </tr>
