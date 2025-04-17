@@ -1,107 +1,188 @@
-.profile-card-container {
-  max-width: 500px;
+/* Main container */
+.profile-card {
+  max-width: 600px;
   margin: 2rem auto;
   padding: 2rem;
-  background: #fff;
+  background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.profile-card-container h2 {
-  color: #333;
+/* Loading state */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid #3498db;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error state */
+.error-container {
   text-align: center;
-  margin-bottom: 1.5rem;
+  padding: 2rem;
+  color: #e74c3c;
 }
 
-.profile-form .form-group {
-  margin-bottom: 1.2rem;
+.error-container button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
-.profile-form label {
-  display: block;
-  margin-bottom: 0.5rem;
+/* Form styles */
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.profile-form h2 {
+  margin-top: 0;
+  color: #2c3e50;
+  text-align: center;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
   font-weight: 500;
-  color: #555;
+  color: #2c3e50;
 }
 
-.profile-form input {
-  width: 100%;
+.form-group input {
   padding: 0.8rem;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
 }
 
-.profile-form input:disabled {
+.form-group input:disabled {
   background-color: #f5f5f5;
   color: #777;
 }
 
-.form-actions {
+.error-message {
+  color: #e74c3c;
+  margin: 0;
+  text-align: center;
+}
+
+/* View mode styles */
+.profile-view {
   display: flex;
-  justify-content: space-between;
-  margin-top: 1.5rem;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-button {
-  padding: 0.8rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.save-btn {
-  background-color: #4CAF50;
-  color: white;
-}
-
-.save-btn:hover {
-  background-color: #45a049;
-}
-
-.cancel-btn {
-  background-color: #f44336;
-  color: white;
-}
-
-.cancel-btn:hover {
-  background-color: #d32f2f;
-}
-
-.edit-btn {
-  background-color: #2196F3;
-  color: white;
-  width: 100%;
-  margin-top: 1.5rem;
-}
-
-.edit-btn:hover {
-  background-color: #0b7dda;
+.profile-view h2 {
+  margin-top: 0;
+  color: #2c3e50;
+  text-align: center;
 }
 
 .profile-details {
   display: flex;
   flex-direction: column;
+  gap: 1rem;
 }
 
 .detail-item {
   display: flex;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #eee;
+  justify-content: space-between;
+  padding: 0.8rem;
+  background-color: #f9f9f9;
+  border-radius: 4px;
 }
 
 .detail-label {
   font-weight: 500;
-  color: #555;
-  min-width: 80px;
+  color: #2c3e50;
 }
 
 .detail-value {
-  color: #333;
-  flex-grow: 1;
+  color: #555;
+}
+
+/* Buttons */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn-primary {
+  padding: 0.8rem 1.5rem;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  flex: 1;
+}
+
+.btn-primary:hover {
+  background-color: #2980b9;
+}
+
+.btn-primary:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  padding: 0.8rem 1.5rem;
+  background-color: #ecf0f1;
+  color: #2c3e50;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  flex: 1;
+}
+
+.btn-secondary:hover {
+  background-color: #bdc3c7;
+}
+
+.edit-btn {
+  margin-top: 1rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .profile-card {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
 }

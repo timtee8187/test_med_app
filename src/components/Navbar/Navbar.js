@@ -12,6 +12,7 @@ const Navbar = () => {
     const [username, setUsername] = useState("");
     const [showAppointmentForm, setShowAppointmentForm] = useState(false);
     const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+    const [showProfileCard, setShowProfileCard] = useState(false);
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
 
@@ -20,6 +21,8 @@ const Navbar = () => {
     const handleLogout = () => {
         sessionStorage.removeItem("auth-token");
         sessionStorage.removeItem("email");
+        sessionStorage.removeItem("name");
+        sessionStorage.removeItem("phone");
         setIsLoggedIn(false);
         setUsername("");
         setShowProfileDropdown(false);
@@ -43,11 +46,12 @@ const Navbar = () => {
     useEffect(() => { 
         const checkAuthStatus = () => {
             const authToken = sessionStorage.getItem("auth-token");
+            const name = sessionStorage.getItem("name");
             const email = sessionStorage.getItem("email");
             
             if (authToken && email) {
                 setIsLoggedIn(true);
-                setUsername(email.split('@')[0]);
+                setUsername(name || email.split('@')[0]);
             } else {
                 setIsLoggedIn(false);
                 setUsername("");
@@ -58,13 +62,6 @@ const Navbar = () => {
         window.addEventListener('storage', checkAuthStatus);
         return () => window.removeEventListener('storage', checkAuthStatus);
     }, []);
-
-    // Get user data from session storage
-    const user = {
-        name: username,
-        email: sessionStorage.getItem("email") || "user@example.com",
-        joinDate: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
-    };
 
     return (
         <nav>
@@ -113,10 +110,18 @@ const Navbar = () => {
                             </button>
                             {showProfileDropdown && (
                                 <div className="profile-dropdown">
-                                    <ProfileCard user={user} />
                                     <div className="dropdown-actions">
-                                        <Link to="/profile" onClick={() => setShowProfileDropdown(false)}>
-                                            <button className="btn2">Your Profile</button>
+                                        <button 
+                                            className="btn2"
+                                            onClick={() => {
+                                                setShowProfileCard(true);
+                                                setShowProfileDropdown(false);
+                                            }}
+                                        >
+                                            Your Profile
+                                        </button>
+                                        <Link to="/ReportsLayout" onClick={() => setShowProfileDropdown(false)}>
+                                            <button className="btn2">Your Reports</button>
                                         </Link>
                                         <button className="btn2 logout-btn" onClick={handleLogout}>
                                             Logout
@@ -142,6 +147,7 @@ const Navbar = () => {
                 )}
             </ul>
 
+            {/* Appointment Form Popup */}
             <Popup
                 open={showAppointmentForm}
                 onClose={() => setShowAppointmentForm(false)}
@@ -171,6 +177,35 @@ const Navbar = () => {
                         }}
                         onClose={() => setShowAppointmentForm(false)}
                     />
+                </div>
+            </Popup>
+
+            {/* Profile Card Popup */}
+            <Popup
+                open={showProfileCard}
+                onClose={() => setShowProfileCard(false)}
+                modal
+                nested
+                contentStyle={{
+                    width: '90%',
+                    maxWidth: '600px',
+                    borderRadius: '8px',
+                    padding: '0',
+                    border: 'none'
+                }}
+                overlayStyle={{
+                    background: 'rgba(0,0,0,0.5)'
+                }}
+                closeOnDocumentClick={true}
+            >
+                <div className="profile-card-modal">
+                    <button 
+                        className="close-btn" 
+                        onClick={() => setShowProfileCard(false)}
+                    >
+                        &times;
+                    </button>
+                    <ProfileCard />
                 </div>
             </Popup>
         </nav>

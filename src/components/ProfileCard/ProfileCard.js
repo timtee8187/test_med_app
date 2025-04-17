@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { API_URL } from '../../config';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../../config';
 import './ProfileCard.css';
 
 const ProfileCard = () => {
@@ -15,55 +15,70 @@ const ProfileCard = () => {
     email: ''
   });
   const [editMode, setEditMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const authtoken = sessionStorage.getItem('auth-token');
-        const email = sessionStorage.getItem('email');
+  const fetchUserProfile = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const authtoken = sessionStorage.getItem('auth-token');
+      const email = sessionStorage.getItem('email');
 
-        if (!authtoken) {
-          navigate('/login');
-        } else {
-          const response = await fetch(`${API_URL}/api/auth/user`, {
-            headers: {
-              'Authorization': `Bearer ${authtoken}`,
-              'Email': email,
-            },
-          });
-
-          if (response.ok) {
-            const user = await response.json();
-            setUserDetails(user);
-            setUpdatedDetails(user);
-          } else {
-            throw new Error('Failed to fetch user profile');
-          }
-        }
-      } catch (error) {
-        console.error(error);
+      if (!authtoken) {
+        navigate('/login');
+        return;
       }
-    };
 
-    fetchUserProfile();
+      const response = await fetch(`${API_URL}/api/auth/user`, {
+        headers: {
+          'Authorization': `Bearer ${authtoken}`,
+          'Email': email,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user profile');
+      }
+
+      const user = await response.json();
+      setUserDetails(user);
+      setUpdatedDetails(user);
+      setError(null);
+    } catch (err) {
+      console.error('Profile fetch error:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   }, [navigate]);
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, [fetchUserProfile]);
 
   const handleEdit = () => {
     setEditMode(true);
   };
 
+  const handleCancel = () => {
+    setUpdatedDetails(userDetails);
+    setEditMode(false);
+  };
+
   const handleInputChange = (e) => {
-    setUpdatedDetails({
-      ...updatedDetails,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setUpdatedDetails(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     try {
+      setIsLoading(true);
       const authtoken = sessionStorage.getItem('auth-token');
       const email = sessionStorage.getItem('email');
 
@@ -72,7 +87,6 @@ const ProfileCard = () => {
         return;
       }
 
-      const payload = { ...updatedDetails };
       const response = await fetch(`${API_URL}/api/auth/user`, {
         method: 'PUT',
         headers: {
@@ -80,92 +94,127 @@ const ProfileCard = () => {
           'Content-Type': 'application/json',
           'Email': email,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(updatedDetails),
       });
 
-      if (response.ok) {
-        sessionStorage.setItem('name', updatedDetails.name);
-        sessionStorage.setItem('phone', updatedDetails.phone);
-        setUserDetails(updatedDetails);
-        setEditMode(false);
-        alert('Profile Updated Successfully!');
-      } else {
+      if (!response.ok) {
         throw new Error('Failed to update profile');
       }
-    } catch (error) {
-      console.error(error);
+
+      const updatedUser = await response.json();
+      setUserDetails(updatedUser);
+      sessionStorage.setItem('name', updatedUser.name);
+      sessionStorage.setItem('phone', updatedUser.phone);
+      setEditMode(false);
+      setError(null);
+      alert('Profile updated successfully!');
+    } catch (err) {
+      console.error('Update error:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleCancel = () => {
-    setUpdatedDetails(userDetails);
-    setEditMode(false);
-  };
+  if (isLoading) {
+    return (
+      <div className="loading-container">
+        <div className="spinner"></div>
+        <p>Loading profile...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <p>Error: {error}</p>
+        <button onClick={fetchUserProfile}>Retry</button>
+      </div>
+    );
+  }
 
   return (
-    <div className="profile-card-container">
+    <div className="profile-card">
       {editMode ? (
-        <form className="profile-form" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="profile-form">
           <h2>Edit Profile</h2>
           
           <div className="form-group">
-            <label htmlFor="name">Name:</label>
+            <label htmlFor="name">Name</label>
             <input
-              type="text"
               id="name"
-              name="name"
-              value={updatedDetails.name || ''}
-              onChange={handleInputChange}
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="phone">Phone:</label>
-            <input
               type="text"
-              id="phone"
-              name="phone"
-              value={updatedDetails.phone || ''}
+              name="name"
+              value={updatedDetails.name}
               onChange={handleInputChange}
+              required
+              minLength="2"
             />
           </div>
-          
+
           <div className="form-group">
-            <label htmlFor="email">Email:</label>
+            <label htmlFor="phone">Phone</label>
             <input
-              type="email"
+              id="phone"
+              type="tel"
+              name="phone"
+              value={updatedDetails.phone}
+              onChange={handleInputChange}
+              required
+              pattern="[0-9]{10}"
+              title="10-digit phone number"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
               id="email"
+              type="email"
               name="email"
-              value={updatedDetails.email || ''}
+              value={userDetails.email}
               disabled
             />
           </div>
-          
+
+          {error && <p className="error-message">{error}</p>}
+
           <div className="form-actions">
-            <button type="submit" className="save-btn">Save</button>
-            <button type="button" className="cancel-btn" onClick={handleCancel}>Cancel</button>
+            <button type="submit" className="btn-primary" disabled={isLoading}>
+              {isLoading ? 'Saving...' : 'Save Changes'}
+            </button>
+            <button 
+              type="button" 
+              className="btn-secondary"
+              onClick={handleCancel}
+              disabled={isLoading}
+            >
+              Cancel
+            </button>
           </div>
         </form>
       ) : (
-        <div className="profile-details">
-          <h2>Profile Details</h2>
+        <div className="profile-view">
+          <h2>Welcome, {userDetails.name}</h2>
           
-          <div className="detail-item">
-            <span className="detail-label">Name:</span>
-            <span className="detail-value">{userDetails.name}</span>
+          <div className="profile-details">
+            <div className="detail-item">
+              <span className="detail-label">Email:</span>
+              <span className="detail-value">{userDetails.email}</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Phone:</span>
+              <span className="detail-value">{userDetails.phone}</span>
+            </div>
           </div>
-          
-          <div className="detail-item">
-            <span className="detail-label">Phone:</span>
-            <span className="detail-value">{userDetails.phone}</span>
-          </div>
-          
-          <div className="detail-item">
-            <span className="detail-label">Email:</span>
-            <span className="detail-value">{userDetails.email}</span>
-          </div>
-          
-          <button className="edit-btn" onClick={handleEdit}>Edit Profile</button>
+
+          <button 
+            onClick={handleEdit} 
+            className="btn-primary edit-btn"
+          >
+            Edit Profile
+          </button>
         </div>
       )}
     </div>
