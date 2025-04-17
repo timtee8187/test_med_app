@@ -19,14 +19,12 @@ const DoctorCardIC = ({ name, speciality, experience, ratings, onAppointmentChan
       time: appointmentData.time || new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
     };
 
-    // Save to localStorage
     localStorage.setItem('doctorData', JSON.stringify({ name, speciality }));
     localStorage.setItem(name, JSON.stringify(newAppointment));
     
     setAppointments([newAppointment]);
     setShowModal(false);
     
-    // Trigger notification
     if (onAppointmentChange) {
       onAppointmentChange('booked', newAppointment);
     }
@@ -38,11 +36,9 @@ const DoctorCardIC = ({ name, speciality, experience, ratings, onAppointmentChan
     
     setAppointments(updatedAppointments);
     
-    // Update localStorage
     localStorage.removeItem(name);
     localStorage.setItem('appointmentCancelled', JSON.stringify(cancelledAppointment));
     
-    // Trigger notification
     if (onAppointmentChange) {
       onAppointmentChange('cancelled', cancelledAppointment);
     }

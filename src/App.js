@@ -17,21 +17,22 @@ function App() {
   return (
     <div className="App">
       <Router>
-        <Navbar />
-        <div className="content">
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/InstantConsultation" element={<InstantConsultation />} />
-            <Route path="/booking-consultation" element={<BookingConsultation />} />
-            <Route path="/Notification" element={<Notification />} />
-            <Route path="/reviewform" element={<ReviewForm />} />
-            <Route path="/reviews" element={<Reviews/>} />
-            <Route path="/DoctorCardIC" element={<DoctorCardIC/>} />
-            <Route path="/FindDoctorSearchIC" element={<FindDoctorSearchIC/>} />
-          </Routes>
-        </div>
+        <Notification>
+          <Navbar />
+          <div className="content">
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/InstantConsultation" element={<InstantConsultation />} />
+              <Route path="/booking-consultation" element={<BookingConsultation />} />
+              <Route path="/reviewform" element={<ReviewForm />} />
+              <Route path="/reviews" element={<Reviews />} />
+              <Route path="/DoctorCardIC" element={<DoctorCardIC />} />
+              <Route path="/FindDoctorSearchIC" element={<FindDoctorSearchIC />} />
+            </Routes>
+          </div>
+        </Notification>
       </Router>
     </div>
   );
