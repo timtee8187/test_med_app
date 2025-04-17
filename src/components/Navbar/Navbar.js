@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
-import AppointmentFormIC from '../AppointmentFormIC/AppointmentFormIC'; // Adjust path as needed
+import AppointmentFormIC from '../AppointmentFormIC/AppointmentFormIC';
+import ProfileCard from '../ProfileCard/ProfileCard';
 import "./Navbar.css";
 
 const Navbar = () => {
@@ -10,6 +11,8 @@ const Navbar = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [username, setUsername] = useState("");
     const [showAppointmentForm, setShowAppointmentForm] = useState(false);
+    const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+    const dropdownRef = useRef(null);
     const navigate = useNavigate();
 
     const handleClick = () => setClick(!click);
@@ -19,8 +22,23 @@ const Navbar = () => {
         sessionStorage.removeItem("email");
         setIsLoggedIn(false);
         setUsername("");
+        setShowProfileDropdown(false);
         navigate("/login");
     };
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setShowProfileDropdown(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     useEffect(() => { 
         const checkAuthStatus = () => {
@@ -41,6 +59,13 @@ const Navbar = () => {
         return () => window.removeEventListener('storage', checkAuthStatus);
     }, []);
 
+    // Get user data from session storage
+    const user = {
+        name: username,
+        email: sessionStorage.getItem("email") || "user@example.com",
+        joinDate: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
+    };
+
     return (
         <nav>
             <div className="nav__logo">
@@ -57,7 +82,6 @@ const Navbar = () => {
                     <Link to="/">Home</Link>
                 </li>
                 <li className="link">
-                    {/* Modified Appointments link (looks identical but opens popup) */}
                     <a 
                         href="#!" 
                         onClick={(e) => {
@@ -79,14 +103,29 @@ const Navbar = () => {
                     <Link to="/InstantConsultation">Booking</Link>
                 </li>
                 {isLoggedIn ? (
-                    <>
-                        <li className="link">
-                            <span style={{ marginRight: "10px" }}>Welcome, {username}</span>
-                            <button className="btn2" onClick={handleLogout}>
-                                Logout
+                    <li className="link" ref={dropdownRef}>
+                        <div className="profile-dropdown-container">
+                            <button 
+                                className="profile-btn"
+                                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                            >
+                                Welcome, {username} <i className={`fa fa-chevron-${showProfileDropdown ? 'up' : 'down'}`}></i>
                             </button>
-                        </li>
-                    </>
+                            {showProfileDropdown && (
+                                <div className="profile-dropdown">
+                                    <ProfileCard user={user} />
+                                    <div className="dropdown-actions">
+                                        <Link to="/profile" onClick={() => setShowProfileDropdown(false)}>
+                                            <button className="btn2">Your Profile</button>
+                                        </Link>
+                                        <button className="btn2 logout-btn" onClick={handleLogout}>
+                                            Logout
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </li>
                 ) : (
                     <>
                         <li className="link">
@@ -103,7 +142,6 @@ const Navbar = () => {
                 )}
             </ul>
 
-            {/* Hidden Appointment Form Popup */}
             <Popup
                 open={showAppointmentForm}
                 onClose={() => setShowAppointmentForm(false)}

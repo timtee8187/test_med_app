@@ -12,6 +12,7 @@ import ReviewForm from './components/ReviewForm/ReviewForm';
 import Reviews from './components/ReviewForm/Reviews';
 import DoctorCardIC from './components/DoctorCardIC/DoctorCardIC';
 import FindDoctorSearchIC from './components/FindDoctorSearchIC/FindDoctorSearchIC';
+import ProfileCard from './components/ProfileCard/ProfileCard';
 import './App.css';
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
               <Route path="/DoctorCardIC" element={<DoctorCardIC />} />
               <Route path="/FindDoctorSearchIC" element={<FindDoctorSearchIC />} />
               <Route path="/Notification" element={<Notification />} />
+              <Route path="/ProfileCard" element={<ProfileCard />} />
             </Routes>
           </div>
          </Router>

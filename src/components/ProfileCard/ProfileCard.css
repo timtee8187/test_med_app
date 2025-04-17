@@ -1,59 +1,114 @@
+/* ProfileCard.css */
 .profile-card {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  width: 300px;
-  overflow: hidden;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 320px;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.profile-card:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
 }
 
 .profile-header {
-  background: #f8f9fa;
-  padding: 15px;
-  border-bottom: 1px solid #e9ecef;
+    background: linear-gradient(135deg, #2190FF 0%, #0a7ae4 100%);
+    padding: 20px;
+    color: white;
+    text-align: center;
+    position: relative;
 }
 
-.profile-header h2 {
-  margin: 0;
-  color: #333;
-  font-size: 1.2rem;
+.profile-header h3 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
 .profile-content {
-  padding: 15px;
+    padding: 20px;
+}
+
+.profile-info {
+    margin-bottom: 20px;
 }
 
 .profile-info p {
-  margin: 10px 0;
-  color: #555;
+    margin: 12px 0;
+    font-size: 0.95rem;
+    color: #555;
+    display: flex;
+    align-items: center;
+}
+
+.profile-info p strong {
+    color: #333;
+    min-width: 100px;
+    display: inline-block;
+    font-weight: 600;
 }
 
 .profile-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
 }
 
-.logout-btn, .edit-profile-btn {
-  padding: 8px 15px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+.profile-actions .btn2 {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.profile-actions .btn2:first-child {
+    background-color: #2190FF;
+    color: white;
+}
+
+.profile-actions .btn2:first-child:hover {
+    background-color: #0d7ae4;
 }
 
 .logout-btn {
-  background: #dc3545;
-  color: white;
+    background-color: #ff4444;
+    color: white;
 }
 
 .logout-btn:hover {
-  background: #c82333;
+    background-color: #e53935;
 }
 
-.edit-profile-btn {
-  background: #007bff;
-  color: white;
+/* Loading state */
+.profile-card.loading {
+    padding: 30px;
+    text-align: center;
+    color: #666;
+    font-style: italic;
 }
 
-.edit-profile-btn:hover {
-  background: #0069d9;
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .profile-card {
+        width: 280px;
+    }
+    
+    .profile-header h3 {
+        font-size: 1.2rem;
+    }
+    
+    .profile-info p {
+        font-size: 0.9rem;
+    }
 }
