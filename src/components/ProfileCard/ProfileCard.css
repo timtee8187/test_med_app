@@ -1,114 +1,107 @@
-/* ProfileCard.css */
-.profile-card {
-    background: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    width: 320px;
-    overflow: hidden;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    transition: all 0.3s ease;
-    border: 1px solid #e0e0e0;
+.profile-card-container {
+  max-width: 500px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.profile-card:hover {
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-    transform: translateY(-2px);
+.profile-card-container h2 {
+  color: #333;
+  text-align: center;
+  margin-bottom: 1.5rem;
 }
 
-.profile-header {
-    background: linear-gradient(135deg, #2190FF 0%, #0a7ae4 100%);
-    padding: 20px;
-    color: white;
-    text-align: center;
-    position: relative;
+.profile-form .form-group {
+  margin-bottom: 1.2rem;
 }
 
-.profile-header h3 {
-    margin: 0;
-    font-size: 1.4rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
+.profile-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #555;
 }
 
-.profile-content {
-    padding: 20px;
+.profile-form input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
 }
 
-.profile-info {
-    margin-bottom: 20px;
+.profile-form input:disabled {
+  background-color: #f5f5f5;
+  color: #777;
 }
 
-.profile-info p {
-    margin: 12px 0;
-    font-size: 0.95rem;
-    color: #555;
-    display: flex;
-    align-items: center;
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
 }
 
-.profile-info p strong {
-    color: #333;
-    min-width: 100px;
-    display: inline-block;
-    font-weight: 600;
+button {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.profile-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: space-between;
+.save-btn {
+  background-color: #4CAF50;
+  color: white;
 }
 
-.profile-actions .btn2 {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 6px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
-    text-decoration: none;
-    font-size: 0.9rem;
+.save-btn:hover {
+  background-color: #45a049;
 }
 
-.profile-actions .btn2:first-child {
-    background-color: #2190FF;
-    color: white;
+.cancel-btn {
+  background-color: #f44336;
+  color: white;
 }
 
-.profile-actions .btn2:first-child:hover {
-    background-color: #0d7ae4;
+.cancel-btn:hover {
+  background-color: #d32f2f;
 }
 
-.logout-btn {
-    background-color: #ff4444;
-    color: white;
+.edit-btn {
+  background-color: #2196F3;
+  color: white;
+  width: 100%;
+  margin-top: 1.5rem;
 }
 
-.logout-btn:hover {
-    background-color: #e53935;
+.edit-btn:hover {
+  background-color: #0b7dda;
 }
 
-/* Loading state */
-.profile-card.loading {
-    padding: 30px;
-    text-align: center;
-    color: #666;
-    font-style: italic;
+.profile-details {
+  display: flex;
+  flex-direction: column;
 }
 
-/* Responsive adjustments */
-@media (max-width: 480px) {
-    .profile-card {
-        width: 280px;
-    }
-    
-    .profile-header h3 {
-        font-size: 1.2rem;
-    }
-    
-    .profile-info p {
-        font-size: 0.9rem;
-    }
+.detail-item {
+  display: flex;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.detail-label {
+  font-weight: 500;
+  color: #555;
+  min-width: 80px;
+}
+
+.detail-value {
+  color: #333;
+  flex-grow: 1;
 }
