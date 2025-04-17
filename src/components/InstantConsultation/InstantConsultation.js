@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import FindDoctorSearchIC from '../FindDoctorSearchIC/FindDoctorSearchIC';
 import DoctorCardIC from '../DoctorCardIC/DoctorCardIC';
 
-const InstantConsultation = ({ onAppointmentChange }) => {
+const InstantConsultation = () => {
   const [searchParams] = useSearchParams();
   const [doctors, setDoctors] = useState([]);
   const [filteredDoctors, setFilteredDoctors] = useState([]);
@@ -56,6 +56,10 @@ const InstantConsultation = ({ onAppointmentChange }) => {
     }
   };
 
+  const handleAppointmentChange = (type, appointment) => {
+    console.log(`Appointment ${type} with Dr. ${appointment.doctorName}`);
+  };
+
   useEffect(() => {
     getDoctorsDetails();
   }, [getDoctorsDetails]);
@@ -95,7 +99,7 @@ const InstantConsultation = ({ onAppointmentChange }) => {
                     speciality={doctor.speciality}
                     experience={doctor.experience}
                     ratings={doctor.ratings}
-                    onAppointmentChange={onAppointmentChange}
+                    onAppointmentChange={handleAppointmentChange}
                   />
                 ))}
               </div>

@@ -1,77 +1,101 @@
 import React, { useEffect, useState } from 'react';
+import Navbar from '../Navbar/Navbar';
 import './Notification.css';
 
 const Notification = ({ children }) => {
-    const [username, setUsername] = useState("");
-    const [doctorData, setDoctorData] = useState(null);
-    const [appointmentData, setAppointmentData] = useState(null);
-    const [showNotification, setShowNotification] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [doctorData, setDoctorData] = useState(null);
+  const [appointmentData, setAppointmentData] = useState(null);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationType, setNotificationType] = useState('');
+  const [notificationMessage, setNotificationMessage] = useState('');
 
-    useEffect(() => {
-        const checkAppointment = () => {
-            const storedUsername = sessionStorage.getItem('email') || sessionStorage.getItem('patientEmail');
-            const storedDoctorData = JSON.parse(localStorage.getItem('doctorData'));
-            const doctorName = storedDoctorData?.name;
-            const storedAppointment = JSON.parse(localStorage.getItem(doctorName));
+  useEffect(() => {
+    const checkAuthAndData = () => {
+      const storedUsername = sessionStorage.getItem('email');
+      const storedDoctorData = JSON.parse(localStorage.getItem('doctorData'));
+      const storedAppointmentData = JSON.parse(localStorage.getItem(storedDoctorData?.name));
+      const storedNotificationType = localStorage.getItem('notificationType');
+      const storedNotificationMessage = localStorage.getItem('notificationMessage');
 
-            if (storedUsername && storedDoctorData && storedAppointment) {
-                setUsername(storedUsername);
-                setDoctorData(storedDoctorData);
-                setAppointmentData(storedAppointment);
-                setShowNotification(true);
-            } else {
-                setShowNotification(false);
-            }
-        };
-
-        // Initial check
-        checkAppointment();
-
-        // Listen for storage changes
-        const handleStorageChange = () => checkAppointment();
-        window.addEventListener('storage', handleStorageChange);
-
-        return () => {
-            window.removeEventListener('storage', handleStorageChange);
-        };
-    }, []);
-
-    const handleDismiss = () => {
-        setShowNotification(false);
+      setIsLoggedIn(!!storedUsername);
+      
+      if (storedDoctorData) setDoctorData(storedDoctorData);
+      if (storedAppointmentData) {
+        setAppointmentData(storedAppointmentData);
+        setShowNotification(true);
+      }
+      if (storedNotificationType) setNotificationType(storedNotificationType);
+      if (storedNotificationMessage) setNotificationMessage(storedNotificationMessage);
     };
 
-    if (!showNotification || !appointmentData) {
-        return <>{children}</>;
-    }
+    checkAuthAndData();
 
-    return (
-        <div>
-            {children}
-            <div className="notification-container">
-                <div className="notification-card">
-                    <div className="notification-header">
-                        <h3>Appointment Details</h3>
-                        <button className="close-button" onClick={handleDismiss}>×</button>
-                    </div>
-                    <div className="notification-content">
-                        <p><strong>Doctor:</strong> {doctorData?.name}</p>
-                        <p><strong>Specialty:</strong> {doctorData?.speciality}</p>
-                        <p><strong>Name:</strong> {username}</p>
-                        {appointmentData.patientPhone && (
-                            <p><strong>Phone Number:</strong> {appointmentData.patientPhone}</p>
-                        )}
-                        <p><strong>Date:</strong> {appointmentData.date}</p>
-                        <p><strong>Time:</strong> {appointmentData.time}</p>
-                    </div>
-                    <div className="notification-actions">
-                        <button className="dismiss-button" onClick={handleDismiss}>
-                            Dismiss
-                        </button>
-                    </div>
+    const handleStorageChange = (e) => {
+      if (e.key === 'appointmentData') {
+        const newAppointmentData = JSON.parse(e.newValue);
+        setAppointmentData(newAppointmentData);
+        setShowNotification(true);
+        setNotificationType('booked');
+        setNotificationMessage('Your appointment has been booked successfully!');
+      } else if (e.key === 'appointmentCancelled') {
+        const cancelledData = JSON.parse(e.newValue);
+        setAppointmentData(cancelledData);
+        setShowNotification(true);
+        setNotificationType('cancelled');
+        setNotificationMessage('Your appointment has been cancelled.');
+      } else if (e.key === 'hideNotification') {
+        setShowNotification(false);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
+  const handleClose = () => {
+    setShowNotification(false);
+    localStorage.removeItem('notificationType');
+    localStorage.removeItem('notificationMessage');
+    localStorage.setItem('hideNotification', 'true');
+  };
+
+  return (
+    <div>
+      <Navbar />
+      {children}
+      {isLoggedIn && showNotification && (
+        <div className={`notification-container ${notificationType}`}>
+          <div className="notification-card">
+            <div className="notification-content">
+              <h3 className="notification-title">
+                {notificationType === 'booked' ? '✅ Appointment Booked' : '❌ Appointment Cancelled'}
+              </h3>
+              <p className="notification-message">{notificationMessage}</p>
+              {appointmentData && (
+                <div className="appointment-details">
+                  <p><strong>Doctor:</strong> Dr. {doctorData?.name}</p>
+                  <p><strong>Speciality:</strong> {doctorData?.speciality}</p>
+                  {notificationType === 'booked' && (
+                    <>
+                      <p><strong>Date:</strong> {appointmentData.date}</p>
+                      <p><strong>Time:</strong> {appointmentData.time}</p>
+                    </>
+                  )}
                 </div>
+              )}
+              <button className="notification-close-btn" onClick={handleClose}>
+                Close
+              </button>
             </div>
+          </div>
         </div>
-    );
+      )}
+    </div>
+  );
 };
 
 export default Notification;

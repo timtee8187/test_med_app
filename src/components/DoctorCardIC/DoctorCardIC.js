@@ -16,32 +16,38 @@ const DoctorCardIC = ({ name, speciality, experience, ratings, onAppointmentChan
       doctorSpeciality: speciality,
       ...appointmentData,
       date: appointmentData.date || new Date().toLocaleDateString(),
-      time: appointmentData.time || new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+      time: appointmentData.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
+    // Save data to localStorage
     localStorage.setItem('doctorData', JSON.stringify({ name, speciality }));
     localStorage.setItem(name, JSON.stringify(newAppointment));
+    localStorage.setItem('appointmentData', JSON.stringify(newAppointment));
+    localStorage.setItem('notificationType', 'booked');
+    localStorage.setItem('notificationMessage', `Appointment with Dr. ${name} booked successfully!`);
     
+    // Update state
     setAppointments([newAppointment]);
     setShowModal(false);
     
-    if (onAppointmentChange) {
-      onAppointmentChange('booked', newAppointment);
-    }
+    // Trigger callback and storage event
+    if (onAppointmentChange) onAppointmentChange('booked', newAppointment);
+    window.dispatchEvent(new Event('storage'));
   };
 
   const handleCancel = (appointmentId) => {
     const [cancelledAppointment] = appointments.filter(app => app.id === appointmentId);
-    const updatedAppointments = appointments.filter(app => app.id !== appointmentId);
     
-    setAppointments(updatedAppointments);
-    
+    // Update state and localStorage
+    setAppointments(appointments.filter(app => app.id !== appointmentId));
     localStorage.removeItem(name);
     localStorage.setItem('appointmentCancelled', JSON.stringify(cancelledAppointment));
+    localStorage.setItem('notificationType', 'cancelled');
+    localStorage.setItem('notificationMessage', `Appointment with Dr. ${name} has been cancelled.`);
     
-    if (onAppointmentChange) {
-      onAppointmentChange('cancelled', cancelledAppointment);
-    }
+    // Trigger callback and storage event
+    if (onAppointmentChange) onAppointmentChange('cancelled', cancelledAppointment);
+    window.dispatchEvent(new Event('storage'));
   };
 
   const renderStars = () => {
@@ -75,8 +81,12 @@ const DoctorCardIC = ({ name, speciality, experience, ratings, onAppointmentChan
       <Popup
         trigger={
           <button className={`book-appointment-btn ${appointments.length > 0 ? 'cancel-appointment' : ''}`}>
-            <div>{appointments.length > 0 ? 'Cancel Appointment' : 'Book Appointment'}</div>
-            <div>No Booking Fee</div>
+            {appointments.length > 0 ? 'Cancel Appointment' : (
+              <>
+                Book Appointment
+                <span className="no-fee-text">No Booking Fee</span>
+              </>
+            )}
           </button>
         }
         modal
@@ -119,7 +129,10 @@ const DoctorCardIC = ({ name, speciality, experience, ratings, onAppointmentChan
                     <p><strong>Phone:</strong> {appointment.phoneNumber}</p>
                     <p><strong>When:</strong> {appointment.date} at {appointment.time}</p>
                     <button 
-                      onClick={() => handleCancel(appointment.id)}
+                      onClick={() => {
+                        handleCancel(appointment.id);
+                        close();
+                      }}
                       className="cancel-btn"
                     >
                       Cancel Appointment
