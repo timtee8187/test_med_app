@@ -9,7 +9,6 @@ const ReportsLayout = () => {
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        // Replace with your actual API endpoint
         const response = await fetch('https://api.npoint.io/9a5543d36f1460da2f63');
         
         if (!response.ok) {
@@ -17,11 +16,22 @@ const ReportsLayout = () => {
         }
         
         const data = await response.json();
-        setReports(data.reports || []); // Assuming API returns { reports: [...] }
-        setIsLoading(false);
+        
+        // Transform API data to match our expected structure
+        const formattedReports = data.map((report, index) => ({
+          id: index + 1,
+          doctorName: report.name || `Dr. ${report.doctor}`,
+          speciality: report.speciality || 'General Medicine',
+          reportUrl: report.reportUrl || '/patient_report.pdf'
+        }));
+        
+        setReports(formattedReports);
+        setError(null);
       } catch (err) {
         console.error('Error fetching reports:', err);
         setError(err.message);
+        setReports([]); // Clear reports on error
+      } finally {
         setIsLoading(false);
       }
     };
@@ -29,16 +39,14 @@ const ReportsLayout = () => {
     fetchReports();
   }, []);
 
-  const handleViewReport = (reportId) => {
-    // Open report in new tab
-    window.open(`/reports/${reportId}`, '_blank');
+  const handleViewReport = (reportUrl) => {
+    window.open(reportUrl, '_blank');
   };
 
-  const handleDownloadReport = (reportId, reportName) => {
-    // Create a temporary link to trigger download
+  const handleDownloadReport = (reportUrl, doctorName) => {
     const link = document.createElement('a');
-    link.href = `/patient_report.pdf`; // Path to your PDF in public folder
-    link.download = `${reportName || 'report'}.pdf`;
+    link.href = reportUrl;
+    link.download = `Medical_Report_${doctorName.replace(/\s+/g, '_')}.pdf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -64,37 +72,40 @@ const ReportsLayout = () => {
 
   return (
     <div className="reports-container">
-      <h1>Your Medical Reports</h1>
+      <h1>Reports</h1>
       
       {reports.length > 0 ? (
-        <div className="reports-table-container">
+        <div className="table-responsive">
           <table className="reports-table">
             <thead>
               <tr>
                 <th>Serial Number</th>
                 <th>Doctor Name</th>
-                <th>Doctor Speciality</th>
-                <th>Actions</th>
+                <th>Speciality</th>
+                <th>View Report</th>
+                <th>Download Report</th>
               </tr>
             </thead>
             <tbody>
-              {reports.map((report, index) => (
-                <tr key={report.id || index}>
-                  <td>{index + 1}</td>
-                  <td>{report.doctorName || 'Dr. John Doe'}</td>
-                  <td>{report.speciality || 'General Medicine'}</td>
-                  <td className="actions-cell">
+              {reports.map((report) => (
+                <tr key={report.id}>
+                  <td>{report.id}</td>
+                  <td>{report.doctorName}</td>
+                  <td>{report.speciality}</td>
+                  <td>
                     <button 
                       className="view-btn"
-                      onClick={() => handleViewReport(report.id || index)}
+                      onClick={() => handleViewReport(report.reportUrl)}
                     >
-                      View Report
+                      View
                     </button>
+                  </td>
+                  <td>
                     <button 
                       className="download-btn"
-                      onClick={() => handleDownloadReport(report.id || index, report.reportName)}
+                      onClick={() => handleDownloadReport(report.reportUrl, report.doctorName)}
                     >
-                      Download Report
+                      Download
                     </button>
                   </td>
                 </tr>
@@ -104,7 +115,7 @@ const ReportsLayout = () => {
         </div>
       ) : (
         <div className="no-reports">
-          <p>No reports available yet.</p>
+          <p>No reports available</p>
         </div>
       )}
     </div>
