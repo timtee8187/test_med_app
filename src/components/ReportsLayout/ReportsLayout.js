@@ -45,8 +45,8 @@ const ReportsLayout = () => {
 
   const handleDownloadReport = (reportUrl, doctorName) => {
     const link = document.createElement('a');
-    link.href = reportUrl;
-    link.download = `Medical_Report_${doctorName.replace(/\s+/g, '_')}.pdf`;
+    link.href = '/patient_report.pdf'; // Always use the same PDF file
+    link.download = `Patient_Report_${doctorName.replace(/\s+/g, '_')}.pdf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
