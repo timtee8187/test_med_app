@@ -25,8 +25,9 @@ const InstantConsultation = () => {
       setDoctors(data);
       
       if (searchParams.get('speciality')) {
+        const speciality = searchParams.get('speciality').toLowerCase();
         const filtered = data.filter(doctor => 
-          doctor.speciality.toLowerCase() === searchParams.get('speciality').toLowerCase()
+          doctor.speciality.toLowerCase().includes(speciality)
         );
         setFilteredDoctors(filtered);
         setIsSearched(true);
@@ -43,13 +44,14 @@ const InstantConsultation = () => {
   }, [searchParams]);
 
   const handleSearch = (searchText) => {
-    if (searchText === '') {
+    const text = searchText.toLowerCase();
+    if (text === '') {
       setFilteredDoctors(doctors);
       setIsSearched(true);
     } else {
       const filtered = doctors.filter(doctor =>
-        doctor.speciality.toLowerCase().includes(searchText.toLowerCase()) ||
-        doctor.name.toLowerCase().includes(searchText.toLowerCase())
+        doctor.speciality.toLowerCase().includes(text) ||
+        doctor.name.toLowerCase().includes(text)
       );
       setFilteredDoctors(filtered);
       setIsSearched(true);
@@ -84,7 +86,7 @@ const InstantConsultation = () => {
 
   return (
     <div className="searchpage-container">
-      <FindDoctorSearchIC onSearch={handleSearch} />
+      <FindDoctorSearchIC onSearch={handleSearch} doctors={doctors} />
       <div className="search-results-container">
         {isSearched ? (
           <>

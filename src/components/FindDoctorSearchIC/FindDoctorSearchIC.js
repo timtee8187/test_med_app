@@ -1,71 +1,111 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './FindDoctorSearchIC.css';
 import { useNavigate } from 'react-router-dom';
 
 const initSpeciality = [
-    'Dentist', 'Gynecologist', 'General Physician', 'Dermatologist', 
-    'ENT Specialist', 'Homeopath', 'Ayurveda', 'Cardiologist',
-    'Pediatrician', 'Neurologist', 'Orthopedic', 'Psychiatrist'
+    'Dentist', 
+    'Gynecologist/Obstetrician', 
+    'General Physician', 
+    'Dermatologist', 
+    'ENT Specialist', 
+    'Homeopath', 
+    'Ayurveda',
+    'Cardiologist',
+    'Pediatrician',
+    'Neurologist',
+    'Orthopedic',
+    'Psychiatrist'
 ];
 
 const FindDoctorSearchIC = ({ onSearch }) => {
     const [doctorResultHidden, setDoctorResultHidden] = useState(true);
     const [searchDoctor, setSearchDoctor] = useState('');
-    const [specialities] = useState(initSpeciality);
+    const [filteredSpecialties, setFilteredSpecialties] = useState(initSpeciality);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const filtered = initSpeciality.filter(speciality =>
+            speciality.toLowerCase().includes(searchDoctor.toLowerCase())
+        );
+        setFilteredSpecialties(filtered);
+    }, [searchDoctor]);
 
     const handleDoctorSelect = (speciality) => {
         setSearchDoctor(speciality);
         setDoctorResultHidden(true);
-        onSearch(speciality);
-        navigate(`/instant-consultation?speciality=${speciality}`);
+        if (onSearch) onSearch(speciality);
+        navigate(`/instant-consultation?speciality=${encodeURIComponent(speciality)}`);
     };
 
     const handleInputChange = (e) => {
-        setSearchDoctor(e.target.value);
-        onSearch(e.target.value);
+        const value = e.target.value;
+        setSearchDoctor(value);
+        if (onSearch) onSearch(value);
+    };
+
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        if (searchDoctor.trim()) {
+            if (onSearch) onSearch(searchDoctor);
+            navigate(`/instant-consultation?query=${encodeURIComponent(searchDoctor)}`);
+        }
     };
 
     return (
-        <div className='finddoctor-container'>
+        <div className="finddoctor-container">
             <h1>Find a doctor and Consult instantly</h1>
             <div className="doctor-icon">
                 <i className="fa fa-user-md"></i>
             </div>
-            <div className="home-search-container">
+            
+            <form className="home-search-container" onSubmit={handleSearchSubmit}>
                 <div className="doctor-search-box">
-                    <input 
-                        type="text" 
-                        className="search-doctor-input-box" 
-                        placeholder="Search doctors by name or specialty..." 
+                    <input
+                        type="text"
+                        className="search-doctor-input-box"
+                        placeholder="Search doctors, clinics, hospitals, etc."
+                        value={searchDoctor}
+                        onChange={handleInputChange}
                         onFocus={() => setDoctorResultHidden(false)}
                         onBlur={() => setTimeout(() => setDoctorResultHidden(true), 200)}
-                        value={searchDoctor} 
-                        onChange={handleInputChange} 
+                        onKeyPress={(e) => e.key === 'Enter' && handleSearchSubmit(e)}
                     />
-                    <div className="findiconimg">
-                        <i className="fa fa-search"></i>
-                    </div>
+                    
+                    <button type="submit" className="findiconimg">
+                        <img 
+                            src={process.env.PUBLIC_URL + '/images/search.svg'} 
+                            alt="Search"
+                            className="findIcon"
+                        />
+                    </button>
+                    
                     <div className="search-doctor-input-results" hidden={doctorResultHidden || !searchDoctor}>
-                        {specialities
-                            .filter(speciality => 
-                                speciality.toLowerCase().includes(searchDoctor.toLowerCase())
-                            )
-                            .map(speciality => (
-                                <div 
-                                    className="search-doctor-result-item" 
-                                    key={speciality} 
+                        {filteredSpecialties.length > 0 ? (
+                            filteredSpecialties.map(speciality => (
+                                <div
+                                    className="search-doctor-result-item"
+                                    key={speciality}
                                     onMouseDown={() => handleDoctorSelect(speciality)}
                                 >
-                                    <span><i className="fa fa-search"></i></span>
+                                    <span>
+                                        <img 
+                                            src={process.env.PUBLIC_URL + '/images/search.svg'} 
+                                            alt=""
+                                            style={{height: "10px", width: "10px"}}
+                                        />
+                                    </span>
                                     <span>{speciality}</span>
                                     <span>SPECIALITY</span>
                                 </div>
                             ))
-                        }
+                        ) : (
+                            <div className="search-doctor-result-item no-results">
+                                <span>No specialties found</span>
+                            </div>
+                        )}
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
     );
 };
