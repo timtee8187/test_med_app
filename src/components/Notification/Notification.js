@@ -7,87 +7,111 @@ const Notification = ({ children }) => {
     const [showNotification, setShowNotification] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
     const timeoutRef = useRef(null);
+    const notificationRef = useRef(null);
 
+    // Reset the visibility timer
     const resetTimer = useCallback(() => {
-        if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
-        }
+        clearTimeout(timeoutRef.current);
         setIsVisible(true);
         timeoutRef.current = setTimeout(() => {
             setIsVisible(false);
-            setTimeout(() => setShowNotification(false), 500);
-        }, 15000); // 15 seconds
+        }, 15000); // Hide after 15 seconds
     }, []);
 
+    // Check for appointment data in localStorage
     const checkAppointment = useCallback(() => {
-        const storedDoctorData = JSON.parse(localStorage.getItem('doctorData'));
-        const doctorName = storedDoctorData?.name;
-        const storedAppointment = JSON.parse(localStorage.getItem(doctorName));
+        try {
+            const storedDoctorData = JSON.parse(localStorage.getItem('doctorData'));
+            const doctorName = storedDoctorData?.name;
+            const storedAppointment = JSON.parse(localStorage.getItem(doctorName));
 
-        if (storedDoctorData && storedAppointment) {
-            setDoctorData(storedDoctorData);
-            setAppointmentData(storedAppointment);
-            setShowNotification(true);
-            resetTimer();
-        } else {
-            setShowNotification(false);
-            setIsVisible(false);
-            if (timeoutRef.current) {
+            if (storedDoctorData && storedAppointment) {
+                setDoctorData(storedDoctorData);
+                setAppointmentData(storedAppointment);
+                setShowNotification(true);
+                resetTimer();
+            } else {
+                setIsVisible(false);
                 clearTimeout(timeoutRef.current);
             }
+        } catch (error) {
+            console.error('Error parsing appointment data:', error);
         }
     }, [resetTimer]);
 
+    // Set up storage listener and initial check
     useEffect(() => {
-        // Initial check
         checkAppointment();
-
-        // Listen for storage changes (including cancellations)
+        
         const handleStorageChange = () => {
             checkAppointment();
         };
-        window.addEventListener('storage', handleStorageChange);
 
+        window.addEventListener('storage', handleStorageChange);
         return () => {
             window.removeEventListener('storage', handleStorageChange);
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-            }
+            clearTimeout(timeoutRef.current);
         };
     }, [checkAppointment]);
 
+    // Handle manual dismiss
     const handleDismiss = useCallback(() => {
         setIsVisible(false);
-        setTimeout(() => setShowNotification(false), 500);
-        if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
-        }
+        clearTimeout(timeoutRef.current);
     }, []);
 
-    if (!showNotification || !appointmentData) {
+    // Handle animation completion
+    useEffect(() => {
+        const notification = notificationRef.current;
+        if (!notification) return;
+
+        const handleAnimationEnd = (e) => {
+            if (e.animationName.includes('slideOut')) {
+                setShowNotification(false);
+            }
+        };
+
+        notification.addEventListener('animationend', handleAnimationEnd);
+        return () => {
+            notification.removeEventListener('animationend', handleAnimationEnd);
+        };
+    }, []);
+
+    if (!showNotification) {
         return <>{children}</>;
     }
 
     return (
-        <div>
+        <>
             {children}
-            <div className={`notification-container ${isVisible ? 'visible' : 'hidden'}`}>
+            <div 
+                ref={notificationRef}
+                className={`notification-container ${isVisible ? 'visible' : 'hidden'}`}
+                aria-live="polite"
+                aria-atomic="true"
+            >
                 <div className="notification-card">
                     <div className="notification-header">
                         <h3>Appointment Details</h3>
-                        <button className="close-button" onClick={handleDismiss}>×</button>
+                        <button 
+                            className="close-button" 
+                            onClick={handleDismiss}
+                            aria-label="Close notification"
+                        >
+                            ×
+                        </button>
                     </div>
                     <div className="notification-content">
                         <p><strong>Doctor:</strong> Dr. {doctorData?.name}</p>
                         <p><strong>Speciality:</strong> {doctorData?.speciality}</p>
-                        <p><strong>Name:</strong> {appointmentData.name || 'Not specified'}</p>
-                        <p><strong>Phone Number:</strong> {appointmentData.phoneNumber || 'Not specified'}</p>
-                        <p><strong>Date of Appointment:</strong> {appointmentData.date || 'Not specified'}</p>
-                        <p><strong>Time Slot:</strong> {appointmentData.time || 'Not specified'}</p>
+                        <p><strong>Name:</strong> {appointmentData?.name || 'Not specified'}</p>
+                        <p><strong>Phone Number:</strong> {appointmentData?.phoneNumber || 'Not specified'}</p>
+                        <p><strong>Date:</strong> {appointmentData?.date || 'Not specified'}</p>
+                        <p><strong>Time Slot:</strong> {appointmentData?.time || 'Not specified'}</p>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 

@@ -1,27 +1,44 @@
+/* Base Notification Styles */
 .notification-container {
     position: fixed;
     top: 20px;
     right: 20px;
     z-index: 1000;
-    animation: slideIn 0.5s ease-out;
+    transform: translateX(100%);
+    opacity: 0;
+    pointer-events: none;
 }
 
+/* Animation States */
+.notification-container.visible {
+    animation: slideIn 0.5s ease-out forwards;
+    pointer-events: auto;
+}
+
+.notification-container.hidden {
+    animation: slideOut 0.5s ease-out forwards;
+    pointer-events: none;
+}
+
+/* Notification Card */
 .notification-card {
-    background-color: #1976D2; /* Blue background */
+    background-color: #1976D2;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     width: 320px;
     overflow: hidden;
-    border-left: 5px solid #0D47A1; /* Darker blue accent */
-    color: white; /* White text */
+    border-left: 5px solid #0D47A1;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* Header Styles */
 .notification-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 15px;
-    background-color: #1565C0; /* Slightly darker blue header */
+    background-color: #1565C0;
     border-bottom: 1px solid #0D47A1;
 }
 
@@ -31,6 +48,7 @@
     font-weight: 600;
 }
 
+/* Close Button */
 .close-button {
     background: none;
     border: none;
@@ -46,6 +64,7 @@
     color: white;
 }
 
+/* Content Area */
 .notification-content {
     padding: 15px;
 }
@@ -63,48 +82,30 @@
     color: rgba(255, 255, 255, 0.9);
 }
 
-.notification-actions {
-    padding: 12px 15px;
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-.confirm-button {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 8px 16px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    flex: 1;
-    transition: background-color 0.2s;
-}
-
-.confirm-button:hover {
-    background-color: #43A047;
-}
-
-.cancel-button {
-    background-color: #f44336;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 8px 16px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    flex: 1;
-    transition: background-color 0.2s;
-}
-
-.cancel-button:hover {
-    background-color: #E53935;
-}
-
+/* Animations */
 @keyframes slideIn {
     from { transform: translateX(100%); opacity: 0; }
     to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 480px) {
+    .notification-container {
+        width: calc(100% - 40px);
+        right: 20px;
+        left: 20px;
+    }
+    
+    .notification-card {
+        width: 100%;
+    }
+    
+    .notification-content strong {
+        width: 120px;
+    }
 }
