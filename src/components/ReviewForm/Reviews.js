@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import './Reviews.css';
+import ReviewForm from './ReviewForm';
 
 const Reviews = () => {
   const [doctors, setDoctors] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -17,8 +18,8 @@ const Reviews = () => {
         if (!response.ok) throw new Error('Failed to fetch doctors');
         
         const doctorsData = await response.json();
-        const processedDoctors = doctorsData.map(doctor => ({
-          id: doctor.id || Math.random().toString(36).slice(2),
+        const processedDoctors = doctorsData.map((doctor, index) => ({
+          id: doctor.id || `doc-${index}`,
           name: doctor.name || 'Dr. Unknown',
           speciality: doctor.speciality || 'General Physician',
           profilePic: doctor.profilePic || '',
@@ -45,17 +46,44 @@ const Reviews = () => {
   };
 
   const handleLeaveReview = (doctor) => {
-    navigate('/reviewform', {
-      state: {
-        doctorId: doctor.id,
-        doctorName: doctor.name,
-        doctorSpeciality: doctor.speciality
-      }
+    setSelectedDoctor({
+      id: doctor.id,
+      name: doctor.name,
+      speciality: doctor.speciality
     });
+    setShowReviewForm(true);
   };
 
-  if (loading) return <div className="reviews-loading">Loading reviews...</div>;
-  if (error) return <div className="reviews-error">Error: {error}</div>;
+  const handleReviewSubmit = (review) => {
+    const existingReviews = JSON.parse(localStorage.getItem('doctorReviews')) || [];
+    const updatedReviews = [...existingReviews, review];
+    
+    localStorage.setItem('doctorReviews', JSON.stringify(updatedReviews));
+    setReviews(updatedReviews);
+    setShowReviewForm(false);
+  };
+
+  const handleCloseForm = () => {
+    setShowReviewForm(false);
+  };
+
+  if (loading) {
+    return (
+      <div className="reviews-loading">
+        <div className="spinner"></div>
+        <p>Loading doctors...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="reviews-error">
+        <p>Error loading doctors: {error}</p>
+        <button onClick={() => window.location.reload()}>Retry</button>
+      </div>
+    );
+  }
 
   return (
     <div className="reviews-page">
@@ -82,7 +110,7 @@ const Reviews = () => {
             const doctorReviews = getDoctorReviews(doctor.id);
             const reviewCount = doctorReviews.length;
             const avgRating = reviewCount > 0 
-              ? doctorReviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
+              ? (doctorReviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount).toFixed(1)
               : null;
 
             return (
@@ -105,8 +133,11 @@ const Reviews = () => {
                   <button 
                     onClick={() => handleLeaveReview(doctor)}
                     className="feedback-button"
+                    disabled={doctorReviews.some(r => r.patientName === localStorage.getItem('patientName'))}
                   >
-                    Click Here
+                    {doctorReviews.some(r => r.patientName === localStorage.getItem('patientName')) 
+                      ? 'Reviewed' 
+                      : 'Click Here'}
                   </button>
                 </td>
                 <td>
@@ -123,7 +154,7 @@ const Reviews = () => {
                             </span>
                           ))}
                         </div>
-                        <span className="average-rating">{avgRating.toFixed(1)} ({reviewCount})</span>
+                        <span className="average-rating">{avgRating} ({reviewCount})</span>
                       </>
                     ) : (
                       <span className="no-reviews">No reviews yet</span>
@@ -135,6 +166,18 @@ const Reviews = () => {
           })}
         </tbody>
       </table>
+
+      {showReviewForm && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <ReviewForm
+              doctor={selectedDoctor}
+              onReviewSubmit={handleReviewSubmit}
+              onClose={handleCloseForm}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

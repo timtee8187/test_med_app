@@ -1,104 +1,126 @@
 import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import './ReviewForm.css';
 
-const ReviewForm = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { doctorId, doctorName } = location.state || {};
+const ReviewForm = ({ doctor, onReviewSubmit, onClose }) => {
   const [name, setName] = useState('');
-  const [review, setReview] = useState('');
+  const [reviewText, setReviewText] = useState('');
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    if (!name.trim()) {
+      setError('Please enter your name');
+      return;
+    }
+    
+    if (!reviewText.trim()) {
+      setError('Please write your review');
+      return;
+    }
+    
+    if (rating === 0) {
+      setError('Please select a rating');
+      return;
+    }
 
-    if (!name || !review) return;
+    // Store patient name in localStorage to prevent multiple reviews
+    localStorage.setItem('patientName', name);
 
-    const newReview = {
-      doctorId,
-      doctorName,
+    const review = {
+      doctorId: doctor.id,
+      doctorName: doctor.name,
+      doctorSpeciality: doctor.speciality,
       patientName: name,
-      review,
+      review: reviewText,
       rating,
-      date: new Date().toISOString(),
-      id: Date.now().toString()
+      date: new Date().toISOString()
     };
 
-    const existingReviews = JSON.parse(localStorage.getItem('doctorReviews')) || [];
-    localStorage.setItem('doctorReviews', JSON.stringify([...existingReviews, newReview]));
-
+    onReviewSubmit(review);
     setSubmitted(true);
-    setTimeout(() => navigate('/reviews'), 2000);
+    setError('');
   };
 
-  if (!doctorId) {
+  if (!doctor) {
     return (
-      <div className="review-form-wrapper">
-        <h3>Please select a doctor first</h3>
-        <button onClick={() => navigate('/reviews')}>Back</button>
+      <div className="review-form-container">
+        <h3>No doctor selected</h3>
+        <button onClick={onClose} className="close-button">Close</button>
       </div>
     );
   }
 
   if (submitted) {
     return (
-      <div className="review-form-wrapper">
+      <div className="review-success">
         <h3>Thank you for your review!</h3>
+        <p>Your feedback has been submitted successfully.</p>
+        <button onClick={onClose} className="close-button">Close</button>
       </div>
     );
   }
 
   return (
     <div className="review-form-container">
-      <h1 className="review-heading">Give Your Review</h1>
-      <div className="review-form-wrapper">
-        <form onSubmit={handleSubmit} className="review-form">
-          <div className="form-field">
-            <label><strong>Name:</strong></label>
-            <div className="input-line"></div>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="form-field">
-            <label><strong>Review:</strong></label>
-            <div className="input-line"></div>
-            <textarea
-              value={review}
-              onChange={(e) => setReview(e.target.value)}
-              required
-              rows="4"
-            />
-          </div>
-
-          <div className="form-field">
-            <label><strong>Rating:</strong></label>
-            <div className="input-line"></div>
-            <div className="rating-stars">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <span
-                  key={star}
-                  className={`star ${star <= (hoverRating || rating) ? 'filled' : ''}`}
-                  onClick={() => setRating(star)}
-                  onMouseEnter={() => setHoverRating(star)}
-                  onMouseLeave={() => setHoverRating(0)}
-                >
-                  ☆
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <button type="submit" className="submit-btn">Submit</button>
-        </form>
+      <button onClick={onClose} className="close-button">×</button>
+      <h2>Give Your Review</h2>
+      <div className="doctor-info">
+        <h3>Dr. {doctor.name}</h3>
+        <p>Speciality: {doctor.speciality}</p>
       </div>
+      
+      {error && <div className="error-message">{error}</div>}
+      
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="name">Your Name:</label>
+          <input
+            type="text"
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter your name"
+            required
+          />
+        </div>
+        
+        <div className="form-group">
+          <label htmlFor="review">Your Review:</label>
+          <textarea
+            id="review"
+            value={reviewText}
+            onChange={(e) => setReviewText(e.target.value)}
+            placeholder="Share your experience..."
+            rows="5"
+            required
+          />
+        </div>
+        
+        <div className="form-group">
+          <label>Rating:</label>
+          <div className="star-rating">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <span
+                key={star}
+                className={`star ${star <= (hoverRating || rating) ? 'filled' : ''}`}
+                onClick={() => setRating(star)}
+                onMouseEnter={() => setHoverRating(star)}
+                onMouseLeave={() => setHoverRating(0)}
+              >
+                {star <= (hoverRating || rating) ? '★' : '☆'}
+              </span>
+            ))}
+          </div>
+        </div>
+        
+        <button type="submit" className="submit-button">
+          Submit Review
+        </button>
+      </form>
     </div>
   );
 };
