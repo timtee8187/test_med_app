@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './FindDoctorSearchIC.css';
 import { useNavigate } from 'react-router-dom';
 
-const initSpeciality = [
-    'Dentist', 
-    'Gynecologist/Obstetrician', 
-    'General Physician', 
-    'Dermatologist', 
-    'ENT Specialist', 
-    'Homeopath', 
+const specialties = [
+    'Dentist',
+    'Gynecologist/Obstetrician',
+    'General Physician',
+    'Dermatologist',
+    'ENT Specialist',
+    'Homeopath',
     'Ayurveda',
     'Cardiologist',
     'Pediatrician',
@@ -17,95 +17,91 @@ const initSpeciality = [
     'Psychiatrist'
 ];
 
-const FindDoctorSearchIC = ({ onSearch }) => {
-    const [doctorResultHidden, setDoctorResultHidden] = useState(true);
-    const [searchDoctor, setSearchDoctor] = useState('');
-    const [filteredSpecialties, setFilteredSpecialties] = useState(initSpeciality);
+const FindDoctorSearchIC = () => {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showResults, setShowResults] = useState(false);
+    const [filteredSpecialties, setFilteredSpecialties] = useState(specialties);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const filtered = initSpeciality.filter(speciality =>
-            speciality.toLowerCase().includes(searchDoctor.toLowerCase())
+    const handleInputChange = (e) => {
+        const query = e.target.value;
+        setSearchQuery(query);
+        
+        const filtered = specialties.filter(specialty =>
+            specialty.toLowerCase().includes(query.toLowerCase())
         );
         setFilteredSpecialties(filtered);
-    }, [searchDoctor]);
-
-    const handleDoctorSelect = (speciality) => {
-        setSearchDoctor(speciality);
-        setDoctorResultHidden(true);
-        if (onSearch) onSearch(speciality);
-        navigate(`/instant-consultation?speciality=${encodeURIComponent(speciality)}`);
     };
 
-    const handleInputChange = (e) => {
-        const value = e.target.value;
-        setSearchDoctor(value);
-        if (onSearch) onSearch(value);
+    const handleSpecialtySelect = (specialty) => {
+        setSearchQuery(specialty);
+        setShowResults(false);
+        navigate(`/instant-consultation?specialty=${encodeURIComponent(specialty)}`);
     };
 
-    const handleSearchSubmit = (e) => {
-        e.preventDefault();
-        if (searchDoctor.trim()) {
-            if (onSearch) onSearch(searchDoctor);
-            navigate(`/instant-consultation?query=${encodeURIComponent(searchDoctor)}`);
-        }
+    const handleFocus = () => {
+        setShowResults(true);
+    };
+
+    const handleBlur = () => {
+        setTimeout(() => setShowResults(false), 200);
     };
 
     return (
         <div className="finddoctor-container">
-            <h1>Find a doctor and Consult instantly</h1>
-            <div className="doctor-icon">
-                <i className="fa fa-user-md"></i>
-            </div>
-            
-            <form className="home-search-container" onSubmit={handleSearchSubmit}>
-                <div className="doctor-search-box">
-                    <input
-                        type="text"
-                        className="search-doctor-input-box"
-                        placeholder="Search doctors, clinics, hospitals, etc."
-                        value={searchDoctor}
-                        onChange={handleInputChange}
-                        onFocus={() => setDoctorResultHidden(false)}
-                        onBlur={() => setTimeout(() => setDoctorResultHidden(true), 200)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSearchSubmit(e)}
-                    />
-                    
-                    <button type="submit" className="findiconimg">
-                        <img 
-                            src={process.env.PUBLIC_URL + '/images/search.svg'} 
-                            alt="Search"
-                            className="findIcon"
+            <center>
+                <h1>Find a doctor and Consult instantly</h1>
+                <div className="doctor-icon">
+                    <i className="fa fa-user-md"></i>
+                </div>
+                <div className="home-search-container">
+                    <div className="doctor-search-box">
+                        <input
+                            type="text"
+                            className="search-doctor-input-box"
+                            placeholder="Search doctors, clinics, hospitals, etc."
+                            value={searchQuery}
+                            onChange={handleInputChange}
+                            onFocus={handleFocus}
+                            onBlur={handleBlur}
                         />
-                    </button>
-                    
-                    <div className="search-doctor-input-results" hidden={doctorResultHidden || !searchDoctor}>
-                        {filteredSpecialties.length > 0 ? (
-                            filteredSpecialties.map(speciality => (
-                                <div
-                                    className="search-doctor-result-item"
-                                    key={speciality}
-                                    onMouseDown={() => handleDoctorSelect(speciality)}
-                                >
-                                    <span>
-                                        <img 
-                                            src={process.env.PUBLIC_URL + '/images/search.svg'} 
-                                            alt=""
-                                            style={{height: "10px", width: "10px"}}
-                                        />
-                                    </span>
-                                    <span>{speciality}</span>
-                                    <span>SPECIALITY</span>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="search-doctor-result-item no-results">
-                                <span>No specialties found</span>
+                        <button className="findiconimg">
+                            <img 
+                                src={process.env.PUBLIC_URL + '/images/search.svg'} 
+                                alt="Search"
+                                className="findIcon"
+                            />
+                        </button>
+                        {showResults && (
+                            <div className="search-doctor-input-results">
+                                {filteredSpecialties.length > 0 ? (
+                                    filteredSpecialties.map(specialty => (
+                                        <div
+                                            className="search-doctor-result-item"
+                                            key={specialty}
+                                            onMouseDown={() => handleSpecialtySelect(specialty)}
+                                        >
+                                            <span>
+                                                <img 
+                                                    src={process.env.PUBLIC_URL + '/images/search.svg'} 
+                                                    alt=""
+                                                    style={{height:"10px", width:"10px"}}
+                                                />
+                                            </span>
+                                            <span>{specialty}</span>
+                                            <span>SPECIALITY</span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="search-doctor-result-item no-results">
+                                        <span>No specialties found</span>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
                 </div>
-            </form>
+            </center>
         </div>
     );
 };

@@ -1,65 +1,62 @@
 .finddoctor-container {
-    text-align: center;
-    padding: 2rem;
+    font-family: Arial, sans-serif;
+    padding: 20px;
     max-width: 800px;
     margin: 0 auto;
 }
 
 .finddoctor-container h1 {
-    color: #2c3e50;
-    margin-bottom: 1.5rem;
-    font-size: 2rem;
+    color: #2d7df8;
+    margin-bottom: 20px;
 }
 
 .doctor-icon {
-    font-size: 3rem;
-    color: #3498db;
-    margin-bottom: 1.5rem;
+    margin: 20px 0;
+    font-size: 5rem;
+    color: #2d7df8;
 }
 
 .home-search-container {
     display: flex;
     justify-content: center;
-    margin: 0 auto;
-    width: 100%;
+    margin-bottom: 30px;
 }
 
 .doctor-search-box {
     position: relative;
     width: 100%;
-    max-width: 600px;
+    max-width: 500px;
 }
 
 .search-doctor-input-box {
     width: 100%;
-    padding: 0.8rem 1rem;
-    padding-right: 3rem;
+    padding: 12px 20px;
+    font-size: 16px;
     border: 1px solid #ddd;
-    border-radius: 25px;
-    font-size: 1rem;
+    border-radius: 4px;
     outline: none;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: border-color 0.3s;
 }
 
 .search-doctor-input-box:focus {
-    border-color: #3498db;
+    border-color: #2d7df8;
 }
 
 .findiconimg {
     position: absolute;
-    right: 0.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 50px;
+    background: #2d7df8;
     border: none;
-    padding: 0.5rem;
+    border-radius: 0 4px 4px 0;
     cursor: pointer;
 }
 
-.findiconimg img {
-    height: 20px;
+.findIcon {
     width: 20px;
+    height: 20px;
+    filter: brightness(0) invert(1);
 }
 
 .search-doctor-input-results {
@@ -69,42 +66,47 @@
     overflow-y: auto;
     background: white;
     border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-top: 0.5rem;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     z-index: 100;
+    margin-top: 5px;
 }
 
 .search-doctor-result-item {
     display: flex;
     align-items: center;
-    padding: 0.8rem 1rem;
-    cursor: pointer;
+    padding: 10px 15px;
     border-bottom: 1px solid #eee;
-    transition: background-color 0.2s;
+    cursor: pointer;
 }
 
 .search-doctor-result-item:hover {
-    background-color: #f8f9fa;
-}
-
-.search-doctor-result-item span:first-child {
-    margin-right: 1rem;
+    background-color: #f5f5f5;
 }
 
 .search-doctor-result-item span:nth-child(2) {
     flex-grow: 1;
-    text-align: left;
+    margin-left: 10px;
 }
 
-.search-doctor-result-item span:last-child {
-    color: #7f8c8d;
-    font-size: 0.8rem;
+.search-doctor-result-item span:nth-child(3) {
+    color: #777;
+    font-size: 12px;
     text-transform: uppercase;
 }
 
 .no-results {
-    padding: 1rem;
-    color: #7f8c8d;
+    padding: 15px;
+    color: #777;
     text-align: center;
+}
+
+@media (max-width: 768px) {
+    .finddoctor-container {
+        padding: 15px;
+    }
+    
+    .doctor-search-box {
+        width: 90%;
+    }
 }
