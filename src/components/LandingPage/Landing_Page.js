@@ -30,8 +30,7 @@ const LandingPage = () => {
               <div className="blue1 blob"></div>
             </div>
             <h4>
-              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eaque at
-              quae ducimus. Suscipit omnis quibusdam non cum rem voluptatem!
+              We’re thrilled to have you join the StayHealthy family! Our mission is to help you achieve your wellness goals, whether it’s tracking your fitness, improving your nutrition, or maintaining a balanced lifestyle.
             </h4>
             {/* Updated button with onClick handler */}
             <button className="button" onClick={handleGetStarted}>
